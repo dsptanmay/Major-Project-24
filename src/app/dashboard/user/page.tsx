@@ -41,7 +41,7 @@ export default function UserDashboard() {
                 showThirdwebBranding: false,
               }}
             />
-            <SignOutButton>
+            <SignOutButton redirectUrl="/">
               <button className="flex items-center space-x-2 px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded-lg shadow hover:bg-red-600 transition-all">
                 <LogOut className="w-5 h-5" />
                 <span>Sign Out</span>
@@ -52,7 +52,7 @@ export default function UserDashboard() {
 
         {/* Navigation Cards */}
         <p className="font-semibold text-gray-700 mb-2">
-          Welcome, {user?.fullName} . Here you can access functions available to
+          Welcome, {user?.username} . Here you can access functions available to
           you as a user.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

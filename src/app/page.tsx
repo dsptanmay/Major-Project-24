@@ -10,6 +10,7 @@ import {
   Users,
   LogOut,
   LogIn,
+  Activity,
 } from "lucide-react";
 import { SignOutButton, useUser } from "@clerk/clerk-react";
 import Link from "next/link";
@@ -23,7 +24,7 @@ const LandingPage = () => {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Shield className="w-8 h-8 text-indigo-600" />
+              <Activity className="w-8 h-8 text-indigo-600" />
               <span className="text-xl font-bold text-gray-800">
                 NFT Based Health Records
               </span>
@@ -31,7 +32,11 @@ const LandingPage = () => {
             <nav className="flex items-center space-x-6">
               {isSignedIn && (
                 <Link
-                  href={userRole === 'user' ? '/dashboard/user' : '/dashboard/organization'}
+                  href={
+                    userRole === "user"
+                      ? "/dashboard/user"
+                      : "/dashboard/organization"
+                  }
                   className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                 >
                   Dashboard
