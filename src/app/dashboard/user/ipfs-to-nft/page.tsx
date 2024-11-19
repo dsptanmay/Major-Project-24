@@ -61,9 +61,9 @@ function IPFSToNFTPage() {
     }
   };
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-4xl mx-auto">
-        <header className="flex items-center justify-between mb-8">
+    <div className="absolute inset-0 h-full w-full bg-white bg-[radial-gradient(#e5e7eb_1px,transparent_2px)] [background-size:16px_16px] p-10">
+      <div className=" mx-auto">
+        <header className="flex items-center justify-between mb-8 bg-white rounded-lg shadow-md p-5 hover:shadow-lg transition-all">
           <div className="flex items-center space-x-2">
             <FileText className="w-6 h-6 text-indigo-600" />
             <h1 className="text-3xl font-bold text-gray-900">IPFS to NFT</h1>
