@@ -16,6 +16,7 @@ import Link from "next/link";
 
 const LandingPage = () => {
   const { isSignedIn, user, isLoaded } = useUser();
+  const userRole = user?.publicMetadata.role as string;
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       <header className="fixed w-full top-0 bg-white/80 backdrop-blur-sm shadow-sm">
@@ -30,7 +31,7 @@ const LandingPage = () => {
             <nav className="flex items-center space-x-6">
               {isSignedIn && (
                 <Link
-                  href={""}
+                  href={userRole === 'user' ? '/dashboard/user' : '/dashboard/organization'}
                   className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                 >
                   Dashboard
