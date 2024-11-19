@@ -52,7 +52,7 @@ export default function UserDashboard() {
 
         {/* Navigation Cards */}
         <p className="font-semibold text-gray-700 mb-2">
-          Welcome, {user?.username} . Here you can access functions available to
+          Welcome, {user?.username}. Here you can access functions available to
           you as a user.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
