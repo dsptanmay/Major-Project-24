@@ -9,7 +9,9 @@ async function OrganizationDashboardLayout({
 }) {
   const user = await currentUser();
   const currentRole = user?.publicMetadata.role;
-  if (currentRole !== "medical_organization" || !user) redirect("/");
+  if (!user) redirect("/sign-in");
+  if (!currentRole) redirect("/role-select");
+  if (currentRole !== "medical_organization") redirect("/");
   return <div>{children}</div>;
 }
 
