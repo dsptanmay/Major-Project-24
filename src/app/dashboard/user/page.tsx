@@ -1,5 +1,5 @@
 "use client";
-import { client } from "@/app/client";
+import { client, wallets } from "@/app/client";
 import { SignOutButton } from "@clerk/nextjs";
 import {
   LogOut,
@@ -12,14 +12,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { ConnectButton, darkTheme } from "thirdweb/react";
-import { createWallet } from "thirdweb/wallets";
 
 export default function UserDashboard() {
-  const wallets = [
-    createWallet("io.metamask"),
-    createWallet("com.coinbase.wallet"),
-  ];
-
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-4xl mx-auto">
@@ -29,15 +23,6 @@ export default function UserDashboard() {
             <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
           </div>
           <div className="flex space-x-4">
-            {/* <button
-              onClick={() => {
-                connectToSmartAccount();
-              }}
-              className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white text-sm font-semibold rounded-lg shadow hover:bg-green-600 transition-all"
-            >
-              <WalletMinimal className="w-5 h-5" />
-              <span>Connect Wallet</span>
-            </button> */}
             <ConnectButton
               client={client}
               wallets={wallets}

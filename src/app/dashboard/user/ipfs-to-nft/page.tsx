@@ -1,10 +1,15 @@
 "use client";
-import { contract } from "@/app/client";
+import { client, contract, wallets } from "@/app/client";
 import { prepareContractCall } from "thirdweb";
 
 import React, { useState } from "react";
 import { FileText } from "lucide-react";
-import { useActiveAccount, useSendTransaction } from "thirdweb/react";
+import {
+  ConnectButton,
+  darkTheme,
+  useActiveAccount,
+  useSendTransaction,
+} from "thirdweb/react";
 
 function IPFSToNFTPage() {
   const { mutate: sendTransaction } = useSendTransaction();
@@ -58,15 +63,28 @@ function IPFSToNFTPage() {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <div className="flex items-center space-x-2 mb-2">
+        <header className="flex items-center justify-between mb-8">
+          <div className="flex items-center space-x-2">
             <FileText className="w-6 h-6 text-indigo-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Upload to IPFS</h1>
+            <h1 className="text-3xl font-bold text-gray-900">IPFS to NFT</h1>
           </div>
-          <p className="text-gray-600">
-            Upload your data to IPFS for decentralized storage.
-          </p>
-        </div>
+          <ConnectButton
+            client={client}
+            wallets={wallets}
+            theme={darkTheme({
+              colors: {
+                primaryButtonBg: "hsl(142, 70%, 45%)",
+                primaryButtonText: "hsl(0, 0%, 100%)",
+              },
+            })}
+            connectButton={{ label: "Connect Wallet" }}
+            connectModal={{
+              size: "compact",
+              title: "Connect Wallet",
+              showThirdwebBranding: false,
+            }}
+          />
+        </header>
 
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
@@ -110,19 +128,26 @@ function IPFSToNFTPage() {
                 placeholder="Enter IPFS hash"
               />
             </div>
-            <button
-              onClick={() => {
-                handleClick();
-              }}
-              disabled={converting || !tokenId || !ipfsHash}
-              className={`w-full justify-center inline-flex items-center px-4 py-3 border border-transparent text-sm font-medium rounded-md shadow-sm text-white ${
-                converting || !tokenId || !ipfsHash
-                  ? "bg-indigo-400 cursor-not-allowed"
-                  : "bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              }`}
-            >
-              {converting ? "Converting..." : "Convert"}
-            </button>
+            {!activeAccount && (
+              <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded items-center text-center">
+                You need to connect your wallet in order to use this feature!
+              </div>
+            )}
+            {activeAccount && (
+              <button
+                onClick={() => {
+                  handleClick();
+                }}
+                disabled={converting || !tokenId || !ipfsHash || !activeAccount}
+                className={`w-full justify-center inline-flex items-center px-4 py-3 border border-transparent text-sm font-medium rounded-md shadow-sm text-white ${
+                  converting || !tokenId || !ipfsHash || !activeAccount
+                    ? "bg-indigo-400 cursor-not-allowed"
+                    : "bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                }`}
+              >
+                {converting ? "Converting..." : "Convert"}
+              </button>
+            )}
           </div>
         </div>
       </div>

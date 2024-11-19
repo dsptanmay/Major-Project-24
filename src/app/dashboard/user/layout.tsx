@@ -9,7 +9,9 @@ async function UserDashboardLayout({
 }) {
   const user = await currentUser();
   const currentRole = user?.publicMetadata.role;
-  if (currentRole !== "user" || !user) redirect("/");
+  if (!user) redirect("/sign-in");
+  if (!currentRole) redirect("/role-select");
+  if (currentRole !== "user") redirect("/");
   return <div>{children}</div>;
 }
 
