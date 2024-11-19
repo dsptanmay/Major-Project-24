@@ -1,7 +1,7 @@
-export const dynamic = "force-dynamic"
-export const revalidate = 0
-export const fetchCache = "only-no-store"
-export const maxDuration = 10
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "only-no-store";
+export const maxDuration = 10;
 import { NextResponse } from "next/server";
 import { clerkClient } from "@clerk/nextjs/server";
 
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true });
     } else {
       return NextResponse.json(
-        { success: false, error: "Role already exists!" },
+        { success: false, error: "User already has role." },
         { status: 409 }
       );
     }
