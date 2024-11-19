@@ -12,7 +12,7 @@ import {
   LogIn,
   Activity,
 } from "lucide-react";
-import { SignOutButton, useUser } from "@clerk/clerk-react";
+import { UserButton, useUser } from "@clerk/clerk-react";
 import Link from "next/link";
 
 const LandingPage = () => {
@@ -52,12 +52,19 @@ const LandingPage = () => {
                 </Link>
               )}
               {isSignedIn && (
-                <SignOutButton redirectUrl="/">
-                  <button className="flex items-center space-x-2 px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded-lg shadow hover:bg-red-600 transition-all">
-                    <LogOut className="" />
-                    <span>Sign Out</span>
-                  </button>
-                </SignOutButton>
+                <div className="flex space-x-3">
+                  {/* <SignOutButton redirectUrl="/">
+                    <button className="flex items-center space-x-2 px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded-lg shadow hover:bg-red-600 transition-all">
+                      <LogOut className="" />
+                      <span>Sign Out</span>
+                    </button>
+                  </SignOutButton> */}
+                  <UserButton
+                    appearance={{
+                      layout: { shimmer: true },
+                    }}
+                  />
+                </div>
               )}
             </nav>
           </div>
