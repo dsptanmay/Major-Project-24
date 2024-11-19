@@ -1,6 +1,6 @@
 "use client";
 import { client, wallets } from "@/app/client";
-import { SignOutButton } from "@clerk/nextjs";
+import { SignOutButton, useUser } from "@clerk/nextjs";
 import {
   LogOut,
   Layout,
@@ -15,6 +15,7 @@ import Link from "next/link";
 import { ConnectButton, darkTheme } from "thirdweb/react";
 
 export default function UserDashboard() {
+  const { user } = useUser();
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-4xl mx-auto">
@@ -50,6 +51,10 @@ export default function UserDashboard() {
         </header>
 
         {/* Navigation Cards */}
+        <p className="font-semibold text-gray-700 mb-2">
+          Welcome, {user?.fullName} . Here you can access functions available to
+          you as a user.
+        </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Link
             href="/dashboard/user/invoices"
@@ -117,7 +122,7 @@ export default function UserDashboard() {
           >
             <div className="flex items-center space-x-4">
               <div className="p-3 bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition-colors">
-                <GitPullRequestDraft  className="w-6 h-6 text-indigo-600" />
+                <GitPullRequestDraft className="w-6 h-6 text-indigo-600" />
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-gray-900">
