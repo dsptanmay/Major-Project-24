@@ -69,7 +69,7 @@ export default function OrganizationDashboard() {
                   Documents
                 </h2>
                 <p className="text-sm text-gray-600">
-                  View and manage documents you have access to.
+                  View and manage documents you have access to
                 </p>
               </div>
             </div>
@@ -86,17 +86,17 @@ export default function OrganizationDashboard() {
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-gray-900">
-                  Upload Documents
+                  Fetch IPFS Documents
                 </h2>
                 <p className="text-sm text-gray-600">
-                  Upload your medical records to IPFS
+                  Download documents from NFTs you have access to
                 </p>
               </div>
             </div>
             <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 transition-colors" />
           </Link>
 
-          <Link
+          {/* <Link
             href="/dashboard/organization/ipfs-to-nft"
             className="group p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-between"
           >
@@ -114,7 +114,7 @@ export default function OrganizationDashboard() {
               </div>
             </div>
             <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 transition-colors" />
-          </Link>
+          </Link> */}
 
           <Link
             href="/dashboard/organization/notifications"
@@ -129,7 +129,7 @@ export default function OrganizationDashboard() {
                   Access Requests
                 </h2>
                 <p className="text-sm text-gray-600">
-                  See list of pending requests for access to your documents
+                  See list of pending requests for access
                 </p>
               </div>
             </div>
