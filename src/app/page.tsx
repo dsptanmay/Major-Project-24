@@ -8,7 +8,6 @@ import {
   Clock,
   Share2,
   Users,
-  LogOut,
   LogIn,
   Activity,
 } from "lucide-react";
@@ -76,10 +75,10 @@ const LandingPage = () => {
           <h1 className="text-5xl font-bold text-gray-900 mb-6">
             Secure Patient Health Records
             <br />
-            Powered by NFT Technology
+            <span className="text-indigo-500">Powered by NFT Technology</span>
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Revolutionary healthcare data management system that puts patients
+            A revolutionary healthcare data management system that puts patients
             in control while ensuring security and interoperability.
           </p>
           <button className="px-8 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors inline-flex items-center space-x-2">
