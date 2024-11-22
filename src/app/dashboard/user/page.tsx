@@ -75,7 +75,7 @@ export default function UserDashboard() {
           </Link>
 
           <Link
-            href="/dashboard/user/upload"
+            href="/dashboard/user/add-records"
             className="group p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-between"
           >
             <div className="flex items-center space-x-4">
@@ -87,7 +87,8 @@ export default function UserDashboard() {
                   Upload Documents
                 </h2>
                 <p className="text-sm text-gray-600">
-                  Upload your medical records to IPFS
+                  Upload your medical records to IPFS and get them converted to
+                  NFTs
                 </p>
               </div>
             </div>
