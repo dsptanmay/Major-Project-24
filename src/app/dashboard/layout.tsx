@@ -13,5 +13,5 @@ export default async function DashboardLayout({
 }) {
   const { userId, redirectToSignIn } = await auth();
   if (!userId) return redirectToSignIn();
-  return <ThirdwebProvider>{children}</ThirdwebProvider>;
+  return <div>{children}</div>;
 }

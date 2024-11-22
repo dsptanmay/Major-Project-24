@@ -1,6 +1,7 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import React from "react";
+import { ThirdwebProvider } from "thirdweb/react";
 
 async function OrganizationDashboardLayout({
   children,
@@ -12,7 +13,7 @@ async function OrganizationDashboardLayout({
   const currentRole = user?.publicMetadata.role;
   if (!currentRole) redirect("/role-select");
   if (currentRole !== "medical_organization") redirect("/");
-  return <div>{children}</div>;
+  return <ThirdwebProvider>{children}</ThirdwebProvider>;
 }
 
 export default OrganizationDashboardLayout;

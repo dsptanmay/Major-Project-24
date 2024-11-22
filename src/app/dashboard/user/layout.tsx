@@ -1,6 +1,7 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import React from "react";
+import { ThirdwebProvider } from "thirdweb/react";
 
 async function UserDashboardLayout({
   children,
@@ -12,7 +13,7 @@ async function UserDashboardLayout({
   if (!user) redirect("/sign-in");
   if (!currentRole) redirect("/role-select");
   if (currentRole !== "user") redirect("/");
-  return <div>{children}</div>;
+  return <ThirdwebProvider>{children}</ThirdwebProvider>;
 }
 
 export default UserDashboardLayout;
