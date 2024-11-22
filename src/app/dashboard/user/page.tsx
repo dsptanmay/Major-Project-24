@@ -57,7 +57,7 @@ export default function UserDashboard() {
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Link
-            href="/dashboard/user/invoices"
+            href="/dashboard/user/records"
             className="group p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-between"
           >
             <div className="flex items-center space-x-4">
@@ -65,11 +65,9 @@ export default function UserDashboard() {
                 <FileText className="w-6 h-6 text-indigo-600" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Invoices
-                </h2>
+                <h2 className="text-lg font-semibold text-gray-900">Records</h2>
                 <p className="text-sm text-gray-600">
-                  View and manage your invoices
+                  View and manage your added records
                 </p>
               </div>
             </div>
