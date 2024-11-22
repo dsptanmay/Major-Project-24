@@ -1,9 +1,34 @@
 "use client";
-
 import Link from "next/link";
 import { Home, LayoutDashboard, FileText, ChevronRight } from "lucide-react";
+import { MediaRenderer, useActiveAccount } from "thirdweb/react";
+import { getOwnedERC721s } from "@/utils/getOwnedNFTs";
+import { client, contract } from "@/app/client";
+import { useEffect, useState } from "react";
 
 export default function UserRecordsPage() {
+  const [data, setData] = useState<any>();
+  const [error, setError] = useState<any>();
+  const activeAccount = useActiveAccount();
+  const fetchOwnedNFTS = async () => {
+    try {
+      const result = await getOwnedERC721s({
+        contract,
+        owner: activeAccount?.address!,
+        requestPerSec: 10,
+      });
+      setData(result);
+    } catch (err) {
+      // Log the full error to understand exactly what's happening
+      console.error("NFT Fetch Error:", err);
+      setError(err);
+    }
+  };
+
+  useEffect(() => {
+    if (activeAccount) fetchOwnedNFTS();
+  }, [contract, activeAccount]);
+  console.error(error);
   const recentRecords = [
     { id: 1, date: "2024-11-09", organization: "ABC", status: "Available" },
     { id: 2, date: "2024-11-08", organization: "DEF", status: "Restricted" },
@@ -25,60 +50,70 @@ export default function UserRecordsPage() {
           </p>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-6 hover:shadow-md transition-all">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
             Recent Records
           </h2>
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">
-                    Record ID
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">
-                    Date
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">
-                    Organization
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentRecords.map((record) => (
-                  <tr
-                    key={record.id}
-                    className="border-b border-gray-100 hover:bg-gray-50"
-                  >
-                    <td className="py-3 px-4 text-sm">{`#${record.id}`}</td>
-                    <td className="py-3 px-4 text-sm">{record.date}</td>
-                    <td className="py-3 px-4 text-sm">{record.organization}</td>
-                    <td className="py-3 px-4">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+            {!activeAccount && (
+              <div className="p-5 bg-red-100 text-red-500 rounded-lg border-2 border-red-400">
+                {" "}
+                You must connect to your wallet to view your records!
+              </div>
+            )}
+            {activeAccount && (
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">
+                      Record ID
+                    </th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">
+                      NFT Name
+                    </th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">
+                      NFT Id
+                    </th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">
+                      View
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentRecords.map((record) => (
+                    <tr
+                      key={record.id}
+                      className="border-b border-gray-100 hover:bg-gray-50"
+                    >
+                      <td className="py-3 px-4 text-sm">{`#${record.id}`}</td>
+                      <td className="py-3 px-4 text-sm">{record.date}</td>
+                      <td className="py-3 px-4 text-sm">
+                        {record.organization}
+                      </td>
+                      <td className="py-3 px-4">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                                                 ${
                                                   record.status === "Available"
                                                     ? "bg-green-100 text-green-800"
                                                     : "bg-red-100 text-yellow-800"
                                                 }`}
-                      >
-                        {record.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                        >
+                          {record.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
 
         {/* Navigation Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Link
-            href="/dashboard"
+            href="/dashboard/user"
             className="group p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-between"
           >
             <div className="flex items-center space-x-4">
