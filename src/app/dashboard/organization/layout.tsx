@@ -8,8 +8,8 @@ async function OrganizationDashboardLayout({
   children: React.ReactNode;
 }) {
   const user = await currentUser();
-  const currentRole = user?.publicMetadata.role;
   if (!user) redirect("/sign-in");
+  const currentRole = user?.publicMetadata.role;
   if (!currentRole) redirect("/role-select");
   if (currentRole !== "medical_organization") redirect("/");
   return <div>{children}</div>;
