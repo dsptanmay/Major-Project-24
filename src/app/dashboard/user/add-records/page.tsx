@@ -137,7 +137,7 @@ export default function UploadPage() {
         {/* Navigation Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
           <Link
-            href="/user"
+            href="/dashboard/user"
             className="group p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-between"
           >
             <div className="flex items-center space-x-4">

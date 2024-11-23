@@ -10,6 +10,7 @@ import {
   useActiveAccount,
   useSendTransaction,
 } from "thirdweb/react";
+import Link from "next/link";
 
 function IPFSToNFTPage() {
   const { mutate: sendTransaction } = useSendTransaction();
@@ -62,7 +63,7 @@ function IPFSToNFTPage() {
   };
   return (
     <div className="absolute inset-0 h-full w-full bg-white bg-[radial-gradient(#e5e7eb_1px,transparent_2px)] [background-size:16px_16px] p-10">
-      <div className=" mx-auto">
+      <div className="mx-auto">
         <header className="flex items-center justify-between mb-8 bg-white rounded-lg shadow-md p-5 hover:shadow-lg transition-all">
           <div className="flex items-center space-x-2">
             <FileText className="w-6 h-6 text-indigo-600" />
@@ -150,6 +151,37 @@ function IPFSToNFTPage() {
             )}
           </div>
         </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+        <Link
+          href="/dashboard/user"
+          className="group p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-between border-2"
+        >
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition-colors">
+              <FileText className="w-6 h-6 text-indigo-600" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">Dashboard</h2>
+              <p className="text-sm text-gray-600">Go back to your dashboard</p>
+            </div>
+          </div>
+        </Link>
+
+        <Link
+          href="/"
+          className="group p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-between border-2"
+        >
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition-colors">
+              <FileText className="w-6 h-6 text-indigo-600" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">Home</h2>
+              <p className="text-sm text-gray-600">Return to homepage</p>
+            </div>
+          </div>
+        </Link>
       </div>
     </div>
   );
