@@ -1,9 +1,14 @@
 "use client";
 import Link from "next/link";
 import { Home, LayoutDashboard, FileText, ChevronRight } from "lucide-react";
-import { MediaRenderer, useActiveAccount } from "thirdweb/react";
+import {
+  ConnectButton,
+  darkTheme,
+  MediaRenderer,
+  useActiveAccount,
+} from "thirdweb/react";
 import { getOwnedERC721s } from "@/utils/getOwnedNFTs";
-import { client, contract } from "@/app/client";
+import { client, contract, wallets } from "@/app/client";
 import { useEffect, useState } from "react";
 
 export default function UserRecordsPage() {
@@ -38,6 +43,28 @@ export default function UserRecordsPage() {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-4xl mx-auto">
+        <header className="flex items-center justify-between mb-8 bg-white rounded-lg shadow-md p-5 hover:shadow-lg transition-all">
+          <div className="flex items-center space-x-2">
+            <FileText className="w-6 h-6 text-indigo-600" />
+            <h1 className="text-3xl font-bold text-gray-900">IPFS to NFT</h1>
+          </div>
+          <ConnectButton
+            client={client}
+            wallets={wallets}
+            theme={darkTheme({
+              colors: {
+                primaryButtonBg: "hsl(142, 70%, 45%)",
+                primaryButtonText: "hsl(0, 0%, 100%)",
+              },
+            })}
+            connectButton={{ label: "Connect Wallet" }}
+            connectModal={{
+              size: "compact",
+              title: "Connect Wallet",
+              showThirdwebBranding: false,
+            }}
+          />
+        </header>
         <div className="mb-8">
           <div className="flex items-center space-x-2 mb-2">
             <FileText className="w-6 h-6 text-indigo-600" />
