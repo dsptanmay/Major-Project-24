@@ -1,11 +1,4 @@
-import {
-  integer,
-  pgTable,
-  primaryKey,
-  serial,
-  varchar,
-} from "drizzle-orm/pg-core";
-
+import { pgTable, primaryKey, serial, varchar } from "drizzle-orm/pg-core";
 export const notificationsTable = pgTable("notifications", {
   user_id: varchar({ length: 255 }).notNull(),
   org_id: varchar({ length: 255 }).notNull(),
