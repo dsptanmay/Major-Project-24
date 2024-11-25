@@ -1,9 +1,7 @@
-import React from 'react'
+import React from "react";
 
 function UserNotificationsPage() {
-  return (
-    <div>UserNotificationsPage</div>
-  )
+  return <div>UserNotificationsPage</div>;
 }
 
-export default UserNotificationsPage
+export default UserNotificationsPage;

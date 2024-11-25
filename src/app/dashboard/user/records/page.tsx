@@ -1,13 +1,7 @@
 "use client";
 import Link from "next/link";
 import { Home, LayoutDashboard, FileText, ChevronRight } from "lucide-react";
-import {
-  ConnectButton,
-  darkTheme,
-  MediaRenderer,
-  useActiveAccount,
-} from "thirdweb/react";
-import { getOwnedERC721s } from "@/utils/getOwnedNFTs";
+import { ConnectButton, darkTheme, useActiveAccount } from "thirdweb/react";
 import { client, contract, wallets } from "@/app/client";
 import { useEffect, useState } from "react";
 
@@ -17,11 +11,7 @@ export default function UserRecordsPage() {
   const activeAccount = useActiveAccount();
   const fetchOwnedNFTS = async () => {
     try {
-      const result = await getOwnedERC721s({
-        contract,
-        owner: activeAccount?.address!,
-        requestPerSec: 10,
-      });
+      const result = "";
       setData(result);
     } catch (err) {
       // Log the full error to understand exactly what's happening
@@ -46,7 +36,9 @@ export default function UserRecordsPage() {
         <header className="flex items-center justify-between mb-8 bg-white rounded-lg shadow-md p-5 hover:shadow-lg transition-all">
           <div className="flex items-center space-x-2">
             <FileText className="w-6 h-6 text-indigo-600" />
-            <h1 className="text-3xl font-bold text-gray-900">IPFS to NFT</h1>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Medical Records
+            </h1>
           </div>
           <ConnectButton
             client={client}
@@ -65,17 +57,6 @@ export default function UserRecordsPage() {
             }}
           />
         </header>
-        <div className="mb-8">
-          <div className="flex items-center space-x-2 mb-2">
-            <FileText className="w-6 h-6 text-indigo-600" />
-            <h1 className="text-3xl font-bold text-gray-900">
-              Medical Records
-            </h1>
-          </div>
-          <p className="text-gray-600">
-            View and manage all your medical records in one place.
-          </p>
-        </div>
 
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6 hover:shadow-md transition-all">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
