@@ -1,34 +1,60 @@
 "use client";
 import Link from "next/link";
-import { Home, LayoutDashboard, FileText, ChevronRight } from "lucide-react";
+import {
+  Home,
+  LayoutDashboard,
+  FileText,
+  ChevronRight,
+  Library,
+} from "lucide-react";
 import { ConnectButton, darkTheme, useActiveAccount } from "thirdweb/react";
 import { client, contract, wallets } from "@/app/client";
-import { useEffect, useState } from "react";
+import { getNFTs } from "thirdweb/extensions/erc721";
+import { useState, useEffect } from "react";
+import Image from "next/image";
+
+interface NFTMetadata {
+  name?: string;
+  description?: string;
+  image?: string;
+}
+
+interface NFT {
+  metadata: NFTMetadata;
+  owner: string | null;
+  id: bigint;
+  tokenURI: string;
+  type: "ERC721";
+}
 
 export default function UserRecordsPage() {
-  const [data, setData] = useState<any>();
-  const [error, setError] = useState<any>();
+  const [nfts, setNfts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const activeAccount = useActiveAccount();
-  const fetchOwnedNFTS = async () => {
+
+  const fetchOwnedNFTs = async () => {
+    if (!activeAccount) return;
+
+    setLoading(true);
     try {
-      const result = "";
-      setData(result);
+      const result = await getNFTs({
+        start: 0,
+        count: 100,
+        contract,
+      });
+      setNfts(result);
     } catch (err) {
-      // Log the full error to understand exactly what's happening
       console.error("NFT Fetch Error:", err);
-      setError(err);
+      setError("Failed to fetch NFTs");
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (activeAccount) fetchOwnedNFTS();
-  }, [contract, activeAccount]);
-  console.error(error);
-  const recentRecords = [
-    { id: 1, date: "2024-11-09", organization: "ABC", status: "Available" },
-    { id: 2, date: "2024-11-08", organization: "DEF", status: "Restricted" },
-    { id: 3, date: "2024-11-07", organization: "XYZ", status: "Available" },
-  ];
+    if (activeAccount) fetchOwnedNFTs();
+  }, [activeAccount]);
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -60,62 +86,62 @@ export default function UserRecordsPage() {
 
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6 hover:shadow-md transition-all">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            Recent Records
+            Your Medical Record NFTs
           </h2>
-          <div className="overflow-x-auto">
-            {!activeAccount && (
-              <div className="p-5 bg-red-100 text-red-500 rounded-lg border-2 border-red-400">
-                {" "}
-                You must connect to your wallet to view your records!
-              </div>
-            )}
-            {activeAccount && (
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">
-                      Record ID
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">
-                      NFT Name
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">
-                      NFT Id
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">
-                      View
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentRecords.map((record) => (
-                    <tr
-                      key={record.id}
-                      className="border-b border-gray-100 hover:bg-gray-50"
-                    >
-                      <td className="py-3 px-4 text-sm">{`#${record.id}`}</td>
-                      <td className="py-3 px-4 text-sm">{record.date}</td>
-                      <td className="py-3 px-4 text-sm">
-                        {record.organization}
-                      </td>
-                      <td className="py-3 px-4">
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                                ${
-                                                  record.status === "Available"
-                                                    ? "bg-green-100 text-green-800"
-                                                    : "bg-red-100 text-yellow-800"
-                                                }`}
-                        >
-                          {record.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
+          {!activeAccount && (
+            <div className="p-5 bg-red-100 text-red-500 rounded-lg border-2 border-red-400">
+              You must connect to your wallet to view your records!
+            </div>
+          )}
+          {loading && (
+            <div className="text-center text-gray-500 py-4">
+              Loading NFTs...
+            </div>
+          )}
+          {error && (
+            <div className="p-5 bg-red-100 text-red-500 rounded-lg">
+              {error}
+            </div>
+          )}
+          {activeAccount && !loading && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {nfts.length === 0 ? (
+                <div className="col-span-full text-center text-gray-500 flex items-center justify-center">
+                  <Library size={48} className="mr-2" />
+                  No Medical Record NFTs found
+                </div>
+              ) : (
+                nfts.map((nft) => (
+                  <div
+                    key={nft.id.toString()}
+                    className="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105"
+                  >
+                    {nft.metadata.image ? (
+                      <Image
+                        src={nft.metadata.image}
+                        alt={nft.metadata.name || "Medical Record NFT"}
+                        width={300}
+                        height={300}
+                        className="w-full h-48 object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+                        <Library size={48} className="text-gray-500" />
+                      </div>
+                    )}
+                    <div className="p-4">
+                      <h3 className="font-bold text-lg truncate">
+                        {nft.metadata.name || "Unnamed Record"}
+                      </h3>
+                      <p className="text-sm text-gray-500">
+                        Record ID: {nft.id.toString()}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
         </div>
 
         {/* Navigation Cards */}
