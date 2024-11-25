@@ -1,4 +1,10 @@
-import { integer, pgTable, primaryKey, varchar } from "drizzle-orm/pg-core";
+import {
+  integer,
+  pgTable,
+  primaryKey,
+  serial,
+  varchar,
+} from "drizzle-orm/pg-core";
 
 export const notificationsTable = pgTable("notifications", {
   user_id: varchar({ length: 255 }).notNull(),
@@ -29,8 +35,13 @@ export const organizationGrantedTokens = pgTable(
   }
 );
 
-export const userNFTsTable = pgTable("user_nfts", {
-  tokenId: varchar({ length: 255 }).primaryKey(),
-  ownerAddress: varchar({ length: 255 }).notNull(),
+export const userNFTsTable = pgTable("user_files", {
+  token_id: serial().primaryKey(),
+  user_address: varchar({ length: 255 }).notNull(),
   description: varchar({ length: 255 }),
+});
+
+export const userEncryptionsKeysTable = pgTable("user_encryptions", {
+  user_address: varchar({ length: 255 }).primaryKey(),
+  encryption_key: varchar({ length: 255 }).notNull(),
 });
