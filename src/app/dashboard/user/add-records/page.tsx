@@ -15,6 +15,7 @@ import {
 } from "thirdweb/react";
 import { prepareContractCall, sendTransaction } from "thirdweb";
 import toast, { Toaster } from "react-hot-toast";
+import { ErrorResponse, TokenCreationResponse } from "@/types/api-responses";
 
 export default function UploadPage() {
   const activeAccount = useActiveAccount();
@@ -23,6 +24,7 @@ export default function UploadPage() {
   const [currentIpfsLink, setCurrentIpfsLink] = useState<any>();
   const [minting, setMinting] = useState(false);
   const [minted, setMinted] = useState(false);
+  const [description, setDescription] = useState("");
   const { mutate: sendTransaction } = useSendTransaction();
 
   const onDrop = useCallback(
@@ -47,13 +49,34 @@ export default function UploadPage() {
   const mintNFTCall = async () => {
     setMinting(true);
     if (activeAccount) {
-      const transaction = prepareContractCall({
-        contract,
-        method:
-          "function mintNFT(address to, uint256 tokenId, string ipfsHash)",
-        params: [activeAccount.address, BigInt(3), currentIpfsLink],
-      });
-      sendTransaction(transaction);
+      try {
+        const response = await fetch("/api/update-user-table", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user_address: activeAccount.address,
+            description,
+          }),
+        });
+        const data: TokenCreationResponse | ErrorResponse =
+          await response.json();
+        if (!response.ok) {
+          toast.error(data.error || "An error occurred!");
+          return;
+        }
+        if (!data.success) {
+          toast.error(data.error || "Failed to generate a token ID!");
+        } else {
+          const tokenId = data.tokenId;
+          const transaction = prepareContractCall({
+            contract,
+            method:
+              "function mintNFT(address to, uint256 tokenId, string ipfsHash)",
+            params: [activeAccount.address, BigInt(tokenId), currentIpfsLink],
+          });
+          sendTransaction(transaction);
+        }
+      } catch (err) {}
       setMinted(true);
     }
     setMinting(false);
@@ -106,6 +129,15 @@ export default function UploadPage() {
                 Upload your document
               </p>
             </div>
+            {uploadSuccess && (
+              <input
+                onChange={(e) => {
+                  setDescription(e.target.value);
+                }}
+                className="rounded-md w-full border-2 border-dashed border-gray-300 px-6 py-5 mt-3 mb-3"
+                placeholder="Enter a descrption here "
+              />
+            )}
           </div>
         )}
         {!activeAccount && (
@@ -119,15 +151,10 @@ export default function UploadPage() {
             <p>Uploading your document...</p>
           </div>
         )}
-        {/* {uploadSuccess && !uploading && (
-          <div className="bg-green-100 text-green-800 p-4 rounded-lg shadow-sm mt-4 flex">
-            <CheckCircle className="w-6 h-6 inline-block mr-2" />
-            <p>Your document has been successfully uploaded to IPFS! </p>
-          </div>
-        )} */}
+
         {uploadSuccess && currentIpfsLink && !minting && !minted && (
           <button
-            className="bg-green-100 text-green-800 rounded-lg shadow-sm mt-4 border-2 border-green-800 px-6 py-2 w-full text-center"
+            className="bg-green-600 text-white rounded-lg shadow-sm mt-4 border-2 border-green-800 px-6 py-2 w-full text-center"
             onClick={mintNFTCall}
           >
             Mint NFT
@@ -153,7 +180,7 @@ export default function UploadPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
           <Link
             href="/dashboard/user"
-            className="group p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-between"
+            className="group p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex it6ems-center justify-between"
           >
             <div className="flex items-center space-x-4">
               <div className="p-3 bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition-colors">
@@ -185,13 +212,6 @@ export default function UploadPage() {
             </div>
           </Link>
         </div>
-        {/* {currentIpfsLink && (
-          <MediaRenderer
-            style={{ padding: 10, fontSize: 25, border: 2 }}
-            client={client}
-            src={currentIpfsLink!}
-          />
-        )} */}
       </div>
       <Toaster />
     </div>
