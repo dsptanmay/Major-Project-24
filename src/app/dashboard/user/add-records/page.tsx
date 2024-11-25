@@ -6,14 +6,15 @@ import { CheckCircle, FileText, CloudUpload } from "lucide-react";
 import { upload } from "thirdweb/storage";
 import Link from "next/link";
 import { client, contract, wallets } from "@/app/client";
+
 import {
   ConnectButton,
   darkTheme,
-  MediaRenderer,
   useActiveAccount,
   useSendTransaction,
 } from "thirdweb/react";
 import { prepareContractCall, sendTransaction } from "thirdweb";
+import toast, { Toaster } from "react-hot-toast";
 
 export default function UploadPage() {
   const activeAccount = useActiveAccount();
@@ -32,6 +33,7 @@ export default function UploadPage() {
       setCurrentIpfsLink(_uri);
       setUploading(false);
       setUploadSuccess(true);
+      toast.success("Document successfully uploaded!");
     },
     [upload, activeAccount, currentIpfsLink]
   );
@@ -49,7 +51,7 @@ export default function UploadPage() {
         contract,
         method:
           "function mintNFT(address to, uint256 tokenId, string ipfsHash)",
-        params: [activeAccount.address, BigInt(2), currentIpfsLink],
+        params: [activeAccount.address, BigInt(3), currentIpfsLink],
       });
       sendTransaction(transaction);
       setMinted(true);
@@ -117,12 +119,12 @@ export default function UploadPage() {
             <p>Uploading your document...</p>
           </div>
         )}
-        {uploadSuccess && !uploading && (
+        {/* {uploadSuccess && !uploading && (
           <div className="bg-green-100 text-green-800 p-4 rounded-lg shadow-sm mt-4 flex">
             <CheckCircle className="w-6 h-6 inline-block mr-2" />
             <p>Your document has been successfully uploaded to IPFS! </p>
           </div>
-        )}
+        )} */}
         {uploadSuccess && currentIpfsLink && !minting && !minted && (
           <button
             className="bg-green-100 text-green-800 rounded-lg shadow-sm mt-4 border-2 border-green-800 px-6 py-2 w-full text-center"
@@ -191,6 +193,7 @@ export default function UploadPage() {
           />
         )} */}
       </div>
+      <Toaster />
     </div>
   );
 }
