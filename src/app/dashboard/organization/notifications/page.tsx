@@ -3,7 +3,12 @@ import React, { useEffect, useState } from "react";
 import { client, wallets } from "@/app/client";
 import { ConnectButton, darkTheme, useActiveAccount } from "thirdweb/react";
 import Link from "next/link";
-import { SquareArrowOutUpRight } from "lucide-react";
+import {
+  ChevronRight,
+  Home,
+  LayoutDashboard,
+  SquareArrowOutUpRight,
+} from "lucide-react";
 
 interface Notification {
   from_id: string;
@@ -84,7 +89,7 @@ const NotificationsPage: React.FC = () => {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+      <main className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8 space-y-10">
         <div className="bg-white/80 backdrop-blur-lg rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all">
           <div className="p-6 border-b border-gray-200">
             <h2 className="text-xl font-semibold text-gray-800">
@@ -104,7 +109,7 @@ const NotificationsPage: React.FC = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Comments
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -126,9 +131,9 @@ const NotificationsPage: React.FC = () => {
                         {notification.nft_token_id}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900">
-                        {notification.comments}
+                        {notification.comments.substring(0, 10)}...
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
                         <StatusLabel status={notification.status} />
                       </td>
                       <td>
@@ -152,6 +157,41 @@ const NotificationsPage: React.FC = () => {
               </div>
             )}
           </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Link
+            href="/dashboard/organization"
+            className="group p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-between"
+          >
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition-colors">
+                <LayoutDashboard className="w-6 h-6 text-indigo-600" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Dashboard
+                </h2>
+                <p className="text-sm text-gray-600">Return to dashboard</p>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 transition-colors" />
+          </Link>
+
+          <Link
+            href="/"
+            className="group p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-between"
+          >
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition-colors">
+                <Home className="w-6 h-6 text-indigo-600" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">Home</h2>
+                <p className="text-sm text-gray-600">Return to homepage</p>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 transition-colors" />
+          </Link>
         </div>
       </main>
     </div>
