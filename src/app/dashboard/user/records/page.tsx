@@ -7,7 +7,12 @@ import {
   ChevronRight,
   Library,
 } from "lucide-react";
-import { ConnectButton, darkTheme, useActiveAccount } from "thirdweb/react";
+import {
+  ConnectButton,
+  darkTheme,
+  useActiveAccount,
+  useReadContract,
+} from "thirdweb/react";
 import { client, contract, wallets } from "@/app/client";
 import { getNFTs } from "thirdweb/extensions/erc721";
 import { useState, useEffect } from "react";
