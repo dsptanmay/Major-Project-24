@@ -12,17 +12,28 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const userId = searchParams.get("userId");
-    if (!userId) {
+    const orgId = searchParams.get("orgId");
+    if (!userId && !orgId) {
       return NextResponse.json(
-        { error: "User ID is required" },
+        { error: "Missing required fields" },
         { status: 400 }
       );
     }
-    const userNotifications = await db
-      .select()
-      .from(notificationsTable)
-      .where(eq(notificationsTable.to_id, userId));
-    return NextResponse.json(userNotifications, { status: 200 });
+    let notifications;
+    if (userId) {
+      notifications = await db
+        .select()
+        .from(notificationsTable)
+        .where(eq(notificationsTable.to_id, userId));
+      return NextResponse.json(notifications, { status: 200 });
+    }
+    if (orgId) {
+      notifications = await db
+        .select()
+        .from(notificationsTable)
+        .where(eq(notificationsTable.from_id, orgId));
+      return NextResponse.json(notifications, { status: 200 });
+    }
   } catch (error) {
     console.error("Error in fetching notifications", error);
     return NextResponse.json(
