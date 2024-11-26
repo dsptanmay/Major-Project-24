@@ -102,3 +102,51 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
+
+interface UpdateNotificationRequest {
+  from_id: string;
+  to_id: string;
+  nft_token_id: string;
+  status: "approved" | "denied";
+}
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const body: UpdateNotificationRequest = await request.json();
+    if (!body.from_id || !body.to_id || !body.nft_token_id || !body.status) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+    if (body.status !== "approved" && body.status !== "denied") {
+      return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+    }
+
+    const updatedNotification = await db
+      .update(notificationsTable)
+      .set({ status: body.status })
+      .where(
+        and(
+          eq(notificationsTable.from_id, body.from_id),
+          eq(notificationsTable.to_id, body.to_id),
+          eq(notificationsTable.nft_token_id, body.nft_token_id)
+        )
+      )
+      .returning();
+
+    if (updatedNotification.length === 0)
+      return NextResponse.json(
+        { error: "Notification not found" },
+        { status: 404 }
+      );
+
+    return NextResponse.json(updatedNotification[0], { status: 200 });
+  } catch (error) {
+    console.error("Error updating notification status", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
