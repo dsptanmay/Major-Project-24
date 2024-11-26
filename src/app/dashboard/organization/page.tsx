@@ -10,6 +10,7 @@ import {
   UploadCloud,
   FileCode2,
   GitPullRequestDraft,
+  ClipboardPlus,
 } from "lucide-react";
 import Link from "next/link";
 import { ConnectButton, darkTheme } from "thirdweb/react";
@@ -77,7 +78,47 @@ export default function OrganizationDashboard() {
           </Link>
 
           <Link
-            href="/dashboard/organization/upload"
+            href="/dashboard/organization/notifications"
+            className="group p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-between"
+          >
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition-colors">
+                <GitPullRequestDraft className="w-6 h-6 text-indigo-600" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Notifications
+                </h2>
+                <p className="text-sm text-gray-600">
+                  See list of pending requests for access
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 transition-colors" />
+          </Link>
+
+          <Link
+            href="/dashboard/organization/request-records"
+            className="group p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-between"
+          >
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition-colors">
+                <ClipboardPlus className="w-6 h-6 text-indigo-600" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Request Access
+                </h2>
+                <p className="text-sm text-gray-600">
+                  Request access for documents from patients
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 transition-colors" />
+          </Link>
+
+          <Link
+            href="/dashboard/organization/view/{id}"
             className="group p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-between"
           >
             <div className="flex items-center space-x-4">
@@ -90,46 +131,6 @@ export default function OrganizationDashboard() {
                 </h2>
                 <p className="text-sm text-gray-600">
                   Download documents from NFTs you have access to
-                </p>
-              </div>
-            </div>
-            <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 transition-colors" />
-          </Link>
-
-          {/* <Link
-            href="/dashboard/organization/ipfs-to-nft"
-            className="group p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-between"
-          >
-            <div className="flex items-center space-x-4">
-              <div className="p-3 bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition-colors">
-                <FileCode2 className="w-6 h-6 text-indigo-600" />
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Convert IPFS to NFT
-                </h2>
-                <p className="text-sm text-gray-600">
-                  Convert your uploaded documents to NFT
-                </p>
-              </div>
-            </div>
-            <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 transition-colors" />
-          </Link> */}
-
-          <Link
-            href="/dashboard/organization/notifications"
-            className="group p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-between"
-          >
-            <div className="flex items-center space-x-4">
-              <div className="p-3 bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition-colors">
-                <GitPullRequestDraft className="w-6 h-6 text-indigo-600" />
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Access Requests
-                </h2>
-                <p className="text-sm text-gray-600">
-                  See list of pending requests for access
                 </p>
               </div>
             </div>
