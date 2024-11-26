@@ -84,7 +84,7 @@ export default function UserRecordsPage() {
           />
         </header>
 
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6 hover:shadow-md transition-all">
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-6 hover:shadow-md transition-all space-y-2">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
             Your Medical Record NFTs
           </h2>
@@ -99,15 +99,15 @@ export default function UserRecordsPage() {
             </div>
           )}
           {error && (
-            <div className="p-5 bg-red-100 text-red-500 rounded-lg">
+            <div className="p-5 bg-red-100 text-red-500 rounded-lg text-center">
               {error}
             </div>
           )}
-          {activeAccount && !loading && (
+          {activeAccount && !loading && !error && (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {nfts.length === 0 ? (
-                <div className="col-span-full text-center text-gray-500 flex items-center justify-center">
-                  <Library size={48} className="mr-2" />
+                <div className="col-span-full text-center text-gray-500 flex flex-col m-2 items-center justify-center">
+                  <Library size={25} className="mr-2" />
                   No Medical Record NFTs found
                 </div>
               ) : (
