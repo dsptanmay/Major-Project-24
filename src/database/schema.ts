@@ -1,11 +1,24 @@
-import { pgTable, primaryKey, serial, varchar } from "drizzle-orm/pg-core";
+import { pgEnum, pgTable, primaryKey, varchar } from "drizzle-orm/pg-core";
 
-export const notificationsTable = pgTable("notifications", {
-  from_id: varchar({ length: 255 }).notNull(),
-  to_id: varchar({ length: 255 }).notNull(),
-  nft_token_id: varchar({ length: 255 }).notNull(),
-  comments: varchar({ length: 255 }).notNull(),
-});
+export const status = pgEnum("status", ["approved", "pending", "denied"]);
+
+export const notificationsTable = pgTable(
+  "notifications",
+  {
+    from_id: varchar({ length: 255 }).notNull(),
+    to_id: varchar({ length: 255 }).notNull(),
+    nft_token_id: varchar({ length: 255 }).notNull(),
+    comments: varchar({ length: 255 }).notNull(),
+    status: status().notNull(),
+  },
+  (table) => {
+    return {
+      pk: primaryKey({
+        columns: [table.from_id, table.to_id, table.nft_token_id],
+      }),
+    };
+  }
+);
 
 export const organizationWalletTable = pgTable("organization_wallets", {
   organization_name: varchar({ length: 255 }).notNull().primaryKey(),
@@ -30,8 +43,9 @@ export const organizationGrantedTokens = pgTable(
 );
 
 export const userNFTsTable = pgTable("user_files", {
-  token_id: serial().primaryKey(),
+  token_id: varchar({ length: 255 }).primaryKey(),
   user_address: varchar({ length: 255 }).notNull(),
+  title: varchar({ length: 255 }).notNull(),
   description: varchar({ length: 255 }),
 });
 
