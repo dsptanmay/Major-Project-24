@@ -13,9 +13,9 @@ export const organizationWalletTable = pgTable("organization_wallets", {
 });
 
 export const organizationGrantedTokens = pgTable(
-  "organization_granted_tokens",
+  "granted_tokens_org",
   {
-    organization_name: varchar({ length: 255 })
+    org_name: varchar({ length: 255 })
       .notNull()
       .references(() => organizationWalletTable.organization_name),
     token_id: varchar({ length: 255 }).notNull(),
@@ -23,7 +23,7 @@ export const organizationGrantedTokens = pgTable(
   (table) => {
     return {
       pk: primaryKey({
-        columns: [table.organization_name, table.token_id],
+        columns: [table.org_name, table.token_id],
       }),
     };
   }
