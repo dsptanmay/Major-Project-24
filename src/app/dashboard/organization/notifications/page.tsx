@@ -140,7 +140,7 @@ const NotificationsPage: React.FC = () => {
                         {notification.status === "approved" && (
                           <Link
                             className="w-full flex items-center text-sm text-center justify-center text-gray-700"
-                            href={`/dashboard/organization/${notification.nft_token_id}`}
+                            href={`/dashboard/organization/view/${notification.nft_token_id}`}
                           >
                             <SquareArrowOutUpRight className="h-4 text-gray-600" />
                           </Link>
