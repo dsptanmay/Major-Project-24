@@ -11,8 +11,9 @@ import {
 } from "lucide-react";
 
 interface Notification {
-  from_id: string;
-  to_id: string;
+  org_address: string;
+  org_name: string;
+  user_address: string;
   nft_token_id: string;
   comments: string;
   status: "pending" | "approved" | "denied";
@@ -125,7 +126,7 @@ const NotificationsPage: React.FC = () => {
                       className="hover:bg-gray-50 transition-colors duration-200"
                     >
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {notification.to_id}
+                        {notification.user_address.substring(0, 10)}...
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {notification.nft_token_id}
