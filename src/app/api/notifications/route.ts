@@ -24,14 +24,14 @@ export async function GET(request: NextRequest) {
       notifications = await db
         .select()
         .from(notificationsTable)
-        .where(eq(notificationsTable.to_id, userId));
+        .where(eq(notificationsTable.user_address, userId));
       return NextResponse.json(notifications, { status: 200 });
     }
     if (orgId) {
       notifications = await db
         .select()
         .from(notificationsTable)
-        .where(eq(notificationsTable.from_id, orgId));
+        .where(eq(notificationsTable.org_address, orgId));
       return NextResponse.json(notifications, { status: 200 });
     }
   } catch (error) {
@@ -46,9 +46,16 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const notificationData = await request.json();
-    const { from_id, to_id, nft_token_id, comments } = notificationData;
+    const { org_address, org_name, user_address, nft_token_id, comments } =
+      notificationData;
 
-    if (!from_id || !to_id || !nft_token_id || !comments)
+    if (
+      !org_address ||
+      !org_name ||
+      !user_address ||
+      !nft_token_id ||
+      !comments
+    )
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -56,7 +63,14 @@ export async function POST(request: NextRequest) {
 
     const newNotification = await db
       .insert(notificationsTable)
-      .values({ from_id, to_id, nft_token_id, comments, status: "pending" })
+      .values({
+        org_address,
+        org_name,
+        user_address,
+        nft_token_id,
+        comments,
+        status: "pending",
+      })
       .returning();
 
     return NextResponse.json(newNotification[0], { status: 201 });
@@ -87,8 +101,8 @@ export async function DELETE(request: NextRequest) {
       .delete(notificationsTable)
       .where(
         and(
-          eq(notificationsTable.from_id, fromId),
-          eq(notificationsTable.to_id, toId),
+          eq(notificationsTable.org_address, fromId),
+          eq(notificationsTable.user_address, toId),
           eq(notificationsTable.nft_token_id, tokenId)
         )
       )
@@ -115,8 +129,8 @@ export async function DELETE(request: NextRequest) {
 }
 
 interface UpdateNotificationRequest {
-  from_id: string;
-  to_id: string;
+  org_address: string;
+  user_address: string;
   nft_token_id: string;
   status: "approved" | "denied";
 }
@@ -124,7 +138,12 @@ interface UpdateNotificationRequest {
 export async function PATCH(request: NextRequest) {
   try {
     const body: UpdateNotificationRequest = await request.json();
-    if (!body.from_id || !body.to_id || !body.nft_token_id || !body.status) {
+    if (
+      !body.org_address ||
+      !body.user_address ||
+      !body.nft_token_id ||
+      !body.status
+    ) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -139,8 +158,8 @@ export async function PATCH(request: NextRequest) {
       .set({ status: body.status })
       .where(
         and(
-          eq(notificationsTable.from_id, body.from_id),
-          eq(notificationsTable.to_id, body.to_id),
+          eq(notificationsTable.org_address, body.org_address),
+          eq(notificationsTable.user_address, body.user_address),
           eq(notificationsTable.nft_token_id, body.nft_token_id)
         )
       )
