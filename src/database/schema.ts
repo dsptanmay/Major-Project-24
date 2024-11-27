@@ -35,6 +35,8 @@ export const organizationGrantedTokens = pgTable(
     token_id: varchar({ length: 255 })
       .notNull()
       .references(() => userNFTsTable.token_id),
+    title: varchar({ length: 255 }).notNull(),
+    description: varchar({ length: 255 }).notNull(),
   },
   (table) => {
     return {
