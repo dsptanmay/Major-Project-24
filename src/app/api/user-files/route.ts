@@ -5,6 +5,7 @@ export const maxDuration = 10;
 
 import { db } from "@/database/db";
 import { userNFTsTable } from "@/database/schema";
+import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
 interface UserDataRequest {
@@ -12,6 +13,40 @@ interface UserDataRequest {
   user_address: string;
   title: string;
   description: string;
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    const searchParams = request.nextUrl.searchParams;
+    const user_address = searchParams.get("userAddress");
+
+    if (!user_address) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    const data = await db
+      .select()
+      .from(userNFTsTable)
+      .where(eq(userNFTsTable.user_address, user_address));
+
+    if (data.length === 0) {
+      return NextResponse.json(
+        { error: "User does not own any NFTs" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(data, { status: 200 });
+  } catch (error) {
+    console.error("Failed to fetch data", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(request: NextRequest) {
