@@ -5,8 +5,9 @@ export const status = pgEnum("status", ["approved", "pending", "denied"]);
 export const notificationsTable = pgTable(
   "notifications",
   {
-    from_id: varchar({ length: 255 }).notNull(),
-    to_id: varchar({ length: 255 }).notNull(),
+    org_address: varchar({ length: 255 }).notNull(),
+    org_name: varchar({ length: 255 }).notNull(),
+    user_address: varchar({ length: 255 }).notNull(),
     nft_token_id: varchar({ length: 255 }).notNull(),
     comments: varchar({ length: 255 }).notNull(),
     status: status().notNull(),
@@ -14,7 +15,7 @@ export const notificationsTable = pgTable(
   (table) => {
     return {
       pk: primaryKey({
-        columns: [table.from_id, table.to_id, table.nft_token_id],
+        columns: [table.org_address, table.user_address, table.nft_token_id],
       }),
     };
   }
@@ -31,7 +32,9 @@ export const organizationGrantedTokens = pgTable(
     org_name: varchar({ length: 255 })
       .notNull()
       .references(() => organizationWalletTable.organization_name),
-    token_id: varchar({ length: 255 }).notNull(),
+    token_id: varchar({ length: 255 })
+      .notNull()
+      .references(() => userNFTsTable.token_id),
   },
   (table) => {
     return {
