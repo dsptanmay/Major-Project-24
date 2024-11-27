@@ -1,190 +1,87 @@
 "use client";
-import Link from "next/link";
-import {
-  Home,
-  LayoutDashboard,
-  FileText,
-  ChevronRight,
-  Library,
-} from "lucide-react";
-import {
-  ConnectButton,
-  darkTheme,
-  useActiveAccount,
-  useReadContract,
-} from "thirdweb/react";
-import { client, contract, wallets } from "@/app/client";
-import { getNFTs } from "thirdweb/extensions/erc721";
-import { useState, useEffect } from "react";
-import Image from "next/image";
 
-interface NFTMetadata {
-  name?: string;
-  description?: string;
-  image?: string;
+import React, { useState, useEffect, act } from "react";
+import { Card, Button, Empty } from "antd";
+import { ConnectButton, useActiveAccount } from "thirdweb/react";
+import { client, wallets } from "@/app/client";
+import { FileText } from "lucide-react";
+import { useRouter } from "next/navigation";
+
+interface UserData {
+  token_id: string;
+  user_address: string;
+  title: string;
+  description: string;
 }
 
-interface NFT {
-  metadata: NFTMetadata;
-  owner: string | null;
-  id: bigint;
-  tokenURI: string;
-  type: "ERC721";
-}
-
-export default function UserRecordsPage() {
-  const [nfts, setNfts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export default function UserFilesDashboard() {
   const activeAccount = useActiveAccount();
-
-  const fetchOwnedNFTs = async () => {
-    if (!activeAccount) return;
-
-    setLoading(true);
-    try {
-      const result = await getNFTs({
-        start: 0,
-        count: 100,
-        contract,
-      });
-      setNfts(result);
-    } catch (err) {
-      console.error("NFT Fetch Error:", err);
-      setError("Failed to fetch NFTs");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [userFiles, setUserFiles] = useState<UserData[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
-    if (activeAccount) fetchOwnedNFTs();
+    const fetchUserFiles = async () => {
+      try {
+        const response = await fetch(
+          `/api/user-files?userAddress=${activeAccount!.address}`,
+          {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+        const data: UserData[] = await response.json();
+        console.log(data);
+        setUserFiles(data);
+      } catch (error) {
+        console.error("Failed to fetch user files:", error);
+      }
+    };
+    if (activeAccount) fetchUserFiles();
   }, [activeAccount]);
 
+  const handleViewFile = (tokenId: any) => {
+    router.push(`/dashboard/user/view/${tokenId}`);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-4xl mx-auto">
-        <header className="flex items-center justify-between mb-8 bg-white rounded-lg shadow-md p-5 hover:shadow-lg transition-all">
-          <div className="flex items-center space-x-2">
-            <FileText className="w-6 h-6 text-indigo-600" />
-            <h1 className="text-3xl font-bold text-gray-900">
-              Medical Records
-            </h1>
-          </div>
-          <ConnectButton
-            client={client}
-            wallets={wallets}
-            theme={darkTheme({
-              colors: {
-                primaryButtonBg: "hsl(142, 70%, 45%)",
-                primaryButtonText: "hsl(0, 0%, 100%)",
-              },
-            })}
-            connectButton={{ label: "Connect Wallet" }}
-            connectModal={{
-              size: "compact",
-              title: "Connect Wallet",
-              showThirdwebBranding: false,
-            }}
-          />
-        </header>
+    <div className="w-full container bg-gradient-to-br from-orange-200 via-blue-200 to-purple-300 min-h-screen max-w-screen-2xl p-10 flex flex-col space-y-5">
+      <header className="flex p-5 bg-white rounded-lg drop-shadow-sm hover:drop-shadow-md transition-all justify-between">
+        <div className="flex items-center space-x-2">
+          <FileText className="text-blue-600 w-6 h-6" />
+          <h1 className="font-semibold text-xl">My NFT Documents</h1>
+        </div>
+        <ConnectButton
+          client={client}
+          wallets={wallets}
+          connectButton={{ label: "Connect Wallet" }}
+        />
+      </header>
 
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6 hover:shadow-md transition-all space-y-2">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            Your Medical Record NFTs
-          </h2>
-          {!activeAccount && (
-            <div className="p-5 bg-red-100 text-red-500 rounded-lg border-2 border-red-400">
-              You must connect to your wallet to view your records!
-            </div>
-          )}
-          {loading && (
-            <div className="text-center text-gray-500 py-4">
-              Loading NFTs...
-            </div>
-          )}
-          {error && (
-            <div className="p-5 bg-red-100 text-red-500 rounded-lg text-center">
-              {error}
-            </div>
-          )}
-          {activeAccount && !loading && !error && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {nfts.length === 0 ? (
-                <div className="col-span-full text-center text-gray-500 flex flex-col m-2 items-center justify-center">
-                  <Library size={25} className="mr-2" />
-                  No Medical Record NFTs found
-                </div>
-              ) : (
-                nfts.map((nft) => (
-                  <div
-                    key={nft.id.toString()}
-                    className="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105"
+      <div className="bg-white rounded-lg drop-shadow-sm hover:drop-shadow-md transition-all p-5 flex flex-col space-y-5">
+        <div className="font-semibold text-xl drop-shadow-sm">
+          NFTs owned by {activeAccount?.address.substring(0, 10)}...
+        </div>
+        {userFiles.length === 0 ? (
+          <Empty description="No files uploaded yet" />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {userFiles.map((file) => (
+              <Card
+                key={file.token_id}
+                actions={[
+                  <Button
+                    type="link"
+                    onClick={() => handleViewFile(file.token_id)}
                   >
-                    {nft.metadata.image ? (
-                      <Image
-                        src={nft.metadata.image}
-                        alt={nft.metadata.name || "Medical Record NFT"}
-                        width={300}
-                        height={300}
-                        className="w-full h-48 object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
-                        <Library size={48} className="text-gray-500" />
-                      </div>
-                    )}
-                    <div className="p-4">
-                      <h3 className="font-bold text-lg truncate">
-                        {nft.metadata.name || "Unnamed Record"}
-                      </h3>
-                      <p className="text-sm text-gray-500">
-                        Record ID: {nft.id.toString()}
-                      </p>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Navigation Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Link
-            href="/dashboard/user"
-            className="group p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-between"
-          >
-            <div className="flex items-center space-x-4">
-              <div className="p-3 bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition-colors">
-                <LayoutDashboard className="w-6 h-6 text-indigo-600" />
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">
-                  Dashboard
-                </h2>
-                <p className="text-sm text-gray-600">Return to dashboard</p>
-              </div>
-            </div>
-            <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 transition-colors" />
-          </Link>
-
-          <Link
-            href="/"
-            className="group p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-between"
-          >
-            <div className="flex items-center space-x-4">
-              <div className="p-3 bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition-colors">
-                <Home className="w-6 h-6 text-indigo-600" />
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Home</h2>
-                <p className="text-sm text-gray-600">Return to homepage</p>
-              </div>
-            </div>
-            <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 transition-colors" />
-          </Link>
-        </div>
+                    View
+                  </Button>,
+                ]}
+              >
+                <Card.Meta title={file.title} description={file.description} />
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
