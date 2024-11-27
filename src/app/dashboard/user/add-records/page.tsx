@@ -1,181 +1,213 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import React, { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import { CheckCircle, FileText, CloudUpload } from "lucide-react";
-import { upload } from "thirdweb/storage";
+import { Button, message, Input, Typography, Card, Space } from "antd";
+import {
+  CloudUploadOutlined,
+  FileTextOutlined,
+  CheckCircleOutlined,
+} from "@ant-design/icons";
 import Link from "next/link";
+import { upload } from "thirdweb/storage";
 import { client, contract, wallets } from "@/app/client";
-
 import {
   ConnectButton,
-  darkTheme,
   useActiveAccount,
+  useReadContract,
   useSendTransaction,
 } from "thirdweb/react";
-import { prepareContractCall, sendTransaction } from "thirdweb";
-import toast, { Toaster } from "react-hot-toast";
-import { ErrorResponse, TokenCreationResponse } from "@/types/api-responses";
+import { prepareContractCall } from "thirdweb";
+import { FileText, FileUp, Home } from "lucide-react";
+
+const { Title, Paragraph } = Typography;
 
 export default function UploadPage() {
-  const activeAccount = useActiveAccount();
-  const [uploading, setUploading] = useState(false);
-  const [uploadSuccess, setUploadSuccess] = useState(false);
-  const [currentIpfsLink, setCurrentIpfsLink] = useState<any>();
-  const [minting, setMinting] = useState(false);
-  const [minted, setMinted] = useState(false);
-  const [description, setDescription] = useState("");
   const { mutate: sendTransaction } = useSendTransaction();
+  const activeAccount = useActiveAccount();
+  const [uploadState, setUploadState] = useState({
+    uploading: false,
+    uploadSuccess: false,
+    currentIpfsLink: "",
+    minting: false,
+    minted: false,
+    description: "",
+    title: "",
+  });
 
-  const onDrop = useCallback(
-    async (acceptedFiles: File[]) => {
-      setUploading(true);
-      const _uri = await upload({ client, files: acceptedFiles });
-      console.log(_uri, typeof _uri);
-      setCurrentIpfsLink(_uri);
-      setUploading(false);
-      setUploadSuccess(true);
-      toast.success("Document successfully uploaded!");
-    },
-    [upload, activeAccount, currentIpfsLink]
-  );
+  const { data: tokenID, isPending } = useReadContract({
+    contract,
+    method: "function nextTokenIdToMint() view returns (uint256)",
+    params: [],
+  });
+  const onDrop = useCallback(async (acceptedFiles: Array<File>) => {
+    const file = acceptedFiles[0];
+    console.log(acceptedFiles);
+    console.log(file);
 
-  const { getRootProps, getInputProps } = useDropzone({
+    try {
+      setUploadState((prev) => ({ ...prev, uploading: true }));
+      const ipfsUri = await upload({ client, files: acceptedFiles });
+
+      setUploadState((prev) => ({
+        ...prev,
+        uploading: false,
+        uploadSuccess: true,
+        currentIpfsLink: ipfsUri as any as string,
+      }));
+
+      message.success("Document successfully uploaded!");
+    } catch (error) {
+      message.error("Upload failed");
+      setUploadState((prev) => ({ ...prev, uploading: false }));
+    }
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: { "application/pdf": [".pdf"], "application/docx": [".docx"] }, // Accept document file types
+    accept: {
+      "application/pdf": [".pdf"],
+    },
     maxFiles: 1,
   });
 
   const mintNFTCall = async () => {
-    setMinting(true);
-    if (activeAccount) {
-      try {
-        const response = await fetch("/api/update-user-table", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user_address: activeAccount.address,
-            description,
-          }),
-        });
-        const data: TokenCreationResponse | ErrorResponse =
-          await response.json();
-        if (!response.ok) {
-          toast.error(data.error || "An error occurred!");
-          return;
-        }
-        if (!data.success) {
-          toast.error(data.error || "Failed to generate a token ID!");
-        } else {
-          const tokenId = data.tokenId;
-          const transaction = prepareContractCall({
-            contract,
-            method:
-              "function mintNFT(address to, uint256 tokenId, string ipfsHash)",
-            params: [activeAccount.address, BigInt(tokenId), currentIpfsLink],
-          });
-          sendTransaction(transaction);
-        }
-      } catch (err) {}
-      setMinted(true);
+    setUploadState((prev) => ({ ...prev, minting: true }));
+    console.log(uploadState.currentIpfsLink);
+    try {
+      const response = await fetch("/api/user-files", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          token_id: tokenID!.toString(),
+          user_address: activeAccount!.address,
+          title: uploadState.title,
+          description: uploadState.description,
+        }),
+      });
+
+      const transaction = prepareContractCall({
+        contract,
+        method:
+          "function mintNFT(address to, string ipfsHash) returns (uint256)",
+        params: [activeAccount!.address, uploadState.currentIpfsLink],
+      });
+      sendTransaction(transaction);
+
+      setUploadState((prev) => ({
+        ...prev,
+        minting: false,
+        minted: true,
+      }));
+
+      message.success("NFT minted successfully!");
+    } catch (error) {
+      message.error("Minting failed");
+      console.error(error);
+      setUploadState((prev) => ({ ...prev, minting: false }));
     }
-    setMinting(false);
   };
 
+  const {
+    uploading,
+    uploadSuccess,
+    currentIpfsLink,
+    minting,
+    minted,
+    description,
+    title,
+  } = uploadState;
+
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-8 flex items-center justify-between">
-          <div className="flex items-center space-x-2 mb-2">
-            <FileText className="w-6 h-6 text-indigo-600" />
-            <h1 className="text-3xl font-bold text-gray-900">
-              Create NFT from records
-            </h1>
+    <div className="w-full container bg-gradient-to-br from-orange-200 via-blue-200 to-purple-300 min-h-screen max-w-screen-2xl p-10">
+      <Space direction="vertical" size="large" style={{ width: "100%" }}>
+        <header className="flex justify-between items-center bg-white rounded-lg drop-shadow-sm hover:drop-shadow-md p-5 ">
+          <div className="flex items-center space-x-2">
+            <FileUp className="text-blue-600 w-6 h-6" />
+            <h1 className="text-xl font-semibold">Create NFT from Records</h1>
           </div>
           <ConnectButton
             client={client}
             wallets={wallets}
-            theme={darkTheme({
-              colors: {
-                primaryButtonBg: "hsl(142, 70%, 45%)",
-                primaryButtonText: "hsl(0, 0%, 100%)",
-              },
-            })}
             connectButton={{ label: "Connect Wallet" }}
-            connectModal={{
-              size: "compact",
-              title: "Connect Wallet",
-              showThirdwebBranding: false,
-            }}
           />
-        </div>
-        <p className="text-gray-600 mb-6">
-          Upload your documents to IPFS for decentralized storage. Drag and drop
-          your file below, and we'll take care of the rest.
-        </p>
-        {/* File Upload Area */}
-        {activeAccount && (
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Drag & Drop your Document
-            </h2>
-            <div
-              {...getRootProps()}
-              className="border-2 border-dashed border-gray-300 p-6 rounded-lg flex flex-col justify-center items-center cursor-pointer"
-            >
-              <input {...getInputProps()} />
-              <CloudUpload className="w-8 h-8 text-indigo-600" />
-              <p className="text-gray-600 text-center mt-4">
-                Upload your document
-              </p>
-            </div>
-            {uploadSuccess && (
-              <input
-                onChange={(e) => {
-                  setDescription(e.target.value);
-                }}
-                className="rounded-md w-full border-2 border-dashed border-gray-300 px-6 py-5 mt-3 mb-3"
-                placeholder="Enter a descrption here "
-              />
-            )}
+        </header>
+
+        <Card>
+          <div
+            {...getRootProps()}
+            className={`border-2 border-dashed p-6 text-center cursor-pointer ${
+              isDragActive ? "border-blue-500 bg-blue-50" : "border-gray-300"
+            }`}
+          >
+            <input {...getInputProps()} />
+            <CloudUploadOutlined className="text-4xl text-blue-600 mb-4" />
+            <Paragraph>Drag & Drop your Document</Paragraph>
+            <Paragraph className="text-gray-600 text-sm">
+              Only PDF files supported
+            </Paragraph>
           </div>
-        )}
-        {!activeAccount && (
-          <div className="bg-red-100 text-red-800 p-4 rounded-lg shadow-sm mt-4 text-center">
-            <p>Please connect your wallet to use the upload feature!</p>
-          </div>
-        )}
-        {/* Upload Status */}
+
+          {uploadSuccess && (
+            <Input
+              placeholder="Enter a title"
+              value={title}
+              onChange={(e) =>
+                setUploadState((prev) => ({
+                  ...prev,
+                  title: e.target.value,
+                }))
+              }
+              className="mt-4 p-3"
+            />
+          )}
+          {uploadSuccess && (
+            <Input
+              placeholder="Enter a description"
+              value={description}
+              onChange={(e) =>
+                setUploadState((prev) => ({
+                  ...prev,
+                  description: e.target.value,
+                }))
+              }
+              className="mt-4"
+            />
+          )}
+        </Card>
+
         {uploading && (
-          <div className="bg-yellow-100 text-yellow-800 p-4 rounded-lg shadow-sm mt-4">
-            <p>Uploading your document...</p>
-          </div>
+          <Card>
+            <Paragraph>Uploading your document...</Paragraph>
+          </Card>
         )}
 
-        {uploadSuccess && currentIpfsLink && !minting && !minted && (
-          <button
-            className="bg-green-600 text-white rounded-lg shadow-sm mt-4 border-2 border-green-800 px-6 py-2 w-full text-center"
-            onClick={mintNFTCall}
-          >
-            Mint NFT
-          </button>
-        )}
+        {uploadSuccess &&
+          currentIpfsLink &&
+          !minting &&
+          !minted &&
+          description &&
+          title && (
+            <Button type="primary" onClick={mintNFTCall} className="w-full">
+              Mint NFT
+            </Button>
+          )}
+
         {minting && (
-          <div className="bg-yellow-100 text-yellow-800 p-4 rounded-lg shadow-sm mt-4">
-            <p>Minting your NFT...</p>
-          </div>
+          <Card>
+            <Paragraph>Minting your NFT...</Paragraph>
+          </Card>
         )}
+
         {minted && (
-          <div className="bg-green-100 text-green-800 p-4 rounded-lg shadow-sm mt-4 flex">
-            <CheckCircle className="w-6 h-6 inline-block mr-2" />
-            <p>Your document has been successfully converted to an NFT! </p>
-          </div>
-        )}
-        {/* Error Message */}
-        {!uploading && !uploadSuccess && currentIpfsLink && (
-          <div className="bg-red-100 text-red-800 p-4 rounded-lg shadow-sm mt-4">
-            <p>There was an error uploading your document. Please try again.</p>
-          </div>
+          <Card>
+            <Space>
+              <CheckCircleOutlined className="text-green-600" />
+              <Paragraph>
+                Your document has been successfully converted to an NFT!
+              </Paragraph>
+            </Space>
+          </Card>
         )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
           <Link
@@ -203,7 +235,7 @@ export default function UploadPage() {
           >
             <div className="flex items-center space-x-4">
               <div className="p-3 bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition-colors">
-                <FileText className="w-6 h-6 text-indigo-600" />
+                <Home className="w-6 h-6 text-indigo-600" />
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-gray-900">Home</h2>
@@ -212,8 +244,16 @@ export default function UploadPage() {
             </div>
           </Link>
         </div>
-      </div>
-      <Toaster />
+
+        {/* <Space>
+          <Link href="/dashboard/user">
+            <Button>Dashboard</Button>
+          </Link>
+          <Link href="/">
+            <Button>Home</Button>
+          </Link>
+        </Space> */}
+      </Space>
     </div>
   );
 }
