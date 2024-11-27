@@ -58,7 +58,7 @@ export default function OrganizationDashboard() {
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Link
-            href="/dashboard/organization/invoices"
+            href="/dashboard/organization/documents"
             className="group p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-between"
           >
             <div className="flex items-center space-x-4">
