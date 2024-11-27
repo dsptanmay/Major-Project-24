@@ -9,10 +9,12 @@ import {
   useSendTransaction,
 } from "thirdweb/react";
 import { prepareContractCall } from "thirdweb";
+import toast, { Toaster } from "react-hot-toast";
 
 interface Notification {
-  from_id: string;
-  to_id: string;
+  org_address: string;
+  org_name: string;
+  user_address: string;
   nft_token_id: string;
   comments: string;
   status: "pending" | "approved" | "denied";
@@ -39,7 +41,7 @@ const NotificationsPage: React.FC = () => {
     if (activeAccount) fetchData();
   }, [activeAccount]);
 
-  const handleGrant = async (notification: Notification) => {
+  const handleApprove = async (notification: Notification) => {
     try {
       console.log("Granting access for notification:", notification);
       const response = await fetch("/api/notifications", {
@@ -48,22 +50,35 @@ const NotificationsPage: React.FC = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from_id: notification.from_id,
-          to_id: notification.to_id,
+          org_address: notification.org_address,
+          x: notification.org_name,
+          user_address: notification.user_address,
           nft_token_id: notification.nft_token_id,
           status: "approved",
+        }),
+      });
+
+      const grantResponse = await fetch("/api/org-files", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          org_name: notification.org_name,
+          token_id: notification.nft_token_id,
         }),
       });
       const transaction = prepareContractCall({
         contract,
         method: "function grantAccess(uint256 tokenId, address user)",
-        params: [BigInt(notification.nft_token_id), notification.from_id],
+        params: [BigInt(notification.nft_token_id), notification.org_address],
       });
       sendTransaction(transaction);
-      if (response.ok) {
+
+      if (response.ok && grantResponse.ok) {
         setNotifications((prevNotifications) =>
           prevNotifications?.filter((n) => n !== notification)
         );
+      } else {
+        toast.error("Failed to grant access!");
       }
     } catch (error) {
       console.error("Error granting access:", error);
@@ -79,8 +94,8 @@ const NotificationsPage: React.FC = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from_id: notification.from_id,
-          to_id: notification.to_id,
+          org_address: notification.org_address,
+          user_address: notification.user_address,
           nft_token_id: notification.nft_token_id,
           status: "denied",
         }),
@@ -140,7 +155,10 @@ const NotificationsPage: React.FC = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    From
+                    Organization Name
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Org Wallet Address
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     NFT Token ID
@@ -161,7 +179,10 @@ const NotificationsPage: React.FC = () => {
                       className="hover:bg-gray-50 transition-colors duration-200"
                     >
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {notification.from_id}
+                        {notification.org_name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {notification.org_address.substring(0, 10)}...
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {notification.nft_token_id}
@@ -171,7 +192,7 @@ const NotificationsPage: React.FC = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right space-x-2">
                         <button
-                          onClick={() => handleGrant(notification)}
+                          onClick={() => handleApprove(notification)}
                           className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-full shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
                         >
                           <Check className="w-4 h-4 mr-1" />
@@ -198,6 +219,7 @@ const NotificationsPage: React.FC = () => {
           </div>
         </div>
       </main>
+      <Toaster />
     </div>
   );
 };

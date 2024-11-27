@@ -1,5 +1,6 @@
 "use client";
 import { client, wallets } from "@/app/client";
+import { useUser } from "@clerk/nextjs";
 import { ChevronRight, Home, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 import React, { useState } from "react";
@@ -7,9 +8,10 @@ import toast, { Toaster } from "react-hot-toast";
 import { ConnectButton, darkTheme, useActiveAccount } from "thirdweb/react";
 
 export default function RequestRecords() {
+  const { user } = useUser();
   const activeAccount = useActiveAccount();
   const [formData, setFormData] = useState({
-    toId: "",
+    user_address: "",
     tokenId: "",
     comments: "",
   });
@@ -27,8 +29,9 @@ export default function RequestRecords() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const data = {
-      from_id: activeAccount!.address,
-      to_id: formData.toId,
+      org_address: activeAccount!.address,
+      org_name: user!.username!,
+      user_address: formData.user_address,
       nft_token_id: formData.tokenId,
       comments: formData.comments,
     };
@@ -44,6 +47,11 @@ export default function RequestRecords() {
       if (response.ok) {
         toast.success("Notification sent successfully!");
       }
+      setFormData({
+        user_address: "",
+        tokenId: "",
+        comments: "",
+      });
     } catch (error: any) {
       toast.error(error);
     }
@@ -51,7 +59,7 @@ export default function RequestRecords() {
 
   // Check if all fields are filled
   const isFormValid =
-    formData.toId.trim() !== "" &&
+    formData.user_address.trim() !== "" &&
     formData.tokenId.trim() !== "" &&
     formData.comments.trim() !== "";
 
@@ -85,17 +93,17 @@ export default function RequestRecords() {
                 htmlFor="toId"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                To ID
+                Patient's Wallet Address <span className="text-red-700">*</span>
               </label>
               <input
                 type="text"
                 id="toId"
-                name="toId"
-                value={formData.toId}
+                name="user_address"
+                value={formData.user_address}
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter patient's wallet ID"
+                placeholder="Enter patient's wallet Address"
               />
             </div>
 
@@ -104,7 +112,7 @@ export default function RequestRecords() {
                 htmlFor="tokenId"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Token ID
+                Token ID of Document <span className="text-red-700">*</span>
               </label>
               <input
                 type="text"
@@ -123,7 +131,7 @@ export default function RequestRecords() {
                 htmlFor="comments"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Comments
+                Comments <span className="text-red-700">*</span>
               </label>
               <textarea
                 id="comments"
