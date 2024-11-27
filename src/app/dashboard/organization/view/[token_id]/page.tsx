@@ -1,5 +1,5 @@
 "use client";
-import { client, contract, wallets } from "@/app/client";
+import { client, wallets } from "@/app/client";
 import { ScanSearch } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
@@ -9,6 +9,7 @@ function ViewIPFSDocumentPage({ params }: any) {
   const activeAccount = useActiveAccount();
   const [ipfsHash, setIpfsHash] = useState("");
   const [ipfsURL, setIpfsURL] = useState("");
+  const [error, setError] = useState("");
   const tokenId = params.token_id! as string;
 
   useEffect(() => {
@@ -26,6 +27,9 @@ function ViewIPFSDocumentPage({ params }: any) {
           }.ipfscdn.io/ipfs/${data.substring(7)}`
         );
         toast.success("Fetched IPFS Hash successfully!");
+      } else {
+        setError("You are not authorized to view this document!");
+        return;
       }
     }
     if (activeAccount) getIpfsHash();
@@ -71,6 +75,11 @@ function ViewIPFSDocumentPage({ params }: any) {
                 style={{ border: "none" }}
                 title={`Document ${tokenId}`}
               />
+            </div>
+          )}
+          {error && (
+            <div className="bg-red-200 text-red-600 border-2 border-red-600 text-center font-semibold text-lg rounded-lg drop-shadow-sm hover:drop-shadow-md">
+              {error}
             </div>
           )}
         </div>
