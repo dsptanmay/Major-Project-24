@@ -44,7 +44,7 @@ export default function UserFilesDashboard() {
   };
 
   return (
-    <div className="w-full container bg-gradient-to-br from-orange-200 via-blue-200 to-purple-300 min-h-screen max-w-screen-2xl p-10 flex flex-col space-y-5">
+    <div className="w-full container bg-gradient-to-br from-orange-300 via-blue-200 to-purple-300 min-h-screen max-w-screen-2xl p-10 flex flex-col space-y-5">
       <header className="flex p-5 bg-white rounded-lg drop-shadow-sm hover:drop-shadow-md transition-all justify-between">
         <div className="flex items-center space-x-2">
           <FileText className="text-blue-600 w-6 h-6" />
