@@ -1,21 +1,24 @@
 import { db } from "@/database/db";
-import { organizationGrantedTokens, userNFTsTable } from "@/database/schema";
+import {
+  organizationGrantedTokens,
+  organizationWalletTable,
+  userNFTsTable,
+} from "@/database/schema";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
 interface OrganizationPostRequest {
   org_name: string;
   token_id: string;
-  title: string;
-  description: string;
+  wallet_address: string;
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body: OrganizationPostRequest = await request.json();
-    const { org_name, token_id } = body;
+    const { org_name, token_id, wallet_address } = body;
 
-    if (!org_name || !token_id)
+    if (!org_name || !token_id || !wallet_address)
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 404 }
@@ -38,6 +41,16 @@ export async function POST(request: NextRequest) {
       .values({ org_name, token_id, title, description })
       .returning();
 
+    const existingOrg = await db
+      .select()
+      .from(organizationWalletTable)
+      .where(eq(organizationWalletTable.organization_name, org_name));
+
+    if (existingOrg.length === 0)
+      await db.insert(organizationWalletTable).values({
+        organization_name: org_name,
+        wallet_address: wallet_address,
+      });
     if (newRecord.length === 0)
       return NextResponse.json(
         { error: "Organization already has access to token" },
