@@ -61,9 +61,14 @@ export default function UserFilesDashboard() {
         <div className="font-semibold text-xl drop-shadow-sm">
           NFTs owned by {activeAccount?.address.substring(0, 10)}...
         </div>
-        {userFiles.length === 0 ? (
-          <Empty description="No files uploaded yet" />
-        ) : (
+
+        {!activeAccount && (
+          <div className="bg-red-300 text-red-700 rounded-lg drop-shadow-sm hover:drop-shadow-md transition-all duration-200 text-center border-2 w-full border-red-600">
+            Connect your Wallet first!
+          </div>
+        )}
+
+        {activeAccount && userFiles.length !== 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {userFiles.map((file) => (
               <Card
@@ -81,6 +86,8 @@ export default function UserFilesDashboard() {
               </Card>
             ))}
           </div>
+        ) : (
+          <Empty description="No files uploaded yet" />
         )}
       </div>
     </div>
