@@ -4,7 +4,7 @@ export const fetchCache = "only-no-store";
 export const maxDuration = 10;
 
 import { db } from "@/database/db";
-import { notificationsTable } from "@/database/schema";
+import { notificationsTable, organizationWalletTable } from "@/database/schema";
 import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -61,6 +61,15 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
 
+    const existingOrg = await db
+      .select()
+      .from(organizationWalletTable)
+      .where(eq(organizationWalletTable.wallet_address, org_address));
+
+    if (existingOrg.length === 0)
+      await db
+        .insert(organizationWalletTable)
+        .values({ organization_name: org_name, wallet_address: org_address });
     const newNotification = await db
       .insert(notificationsTable)
       .values({
