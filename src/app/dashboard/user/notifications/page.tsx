@@ -64,6 +64,7 @@ const NotificationsPage: React.FC = () => {
         body: JSON.stringify({
           org_name: notification.org_name,
           token_id: notification.nft_token_id,
+          wallet_address: activeAccount!.address,
         }),
       });
       const transaction = prepareContractCall({
