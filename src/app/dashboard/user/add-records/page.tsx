@@ -18,7 +18,7 @@ import {
   useSendTransaction,
 } from "thirdweb/react";
 import { prepareContractCall } from "thirdweb";
-import { FileText, FileUp, Home } from "lucide-react";
+import { FileText, FileUp, Home, LayoutDashboard } from "lucide-react";
 
 const { Title, Paragraph } = Typography;
 
@@ -209,50 +209,39 @@ export default function UploadPage() {
             </Space>
           </Card>
         )}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
-          <Link
-            href="/dashboard/user"
-            className="group p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex it6ems-center justify-between"
-          >
-            <div className="flex items-center space-x-4">
-              <div className="p-3 bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition-colors">
-                <FileText className="w-6 h-6 text-indigo-600" />
+        <div className="grid grid-cols-2 gap-4">
+          <Link href="/dashboard/user" className="w-full">
+            <div className="bg-white rounded-xl border-2 border-blue-200 p-6 flex items-center space-x-4 transform transition-all duration-100 hover:shadow-md hover:border-blue-400 group">
+              <div className="bg-blue-100 p-3 rounded-full group-hover:bg-blue-200 transition-colors">
+                <LayoutDashboard className="text-blue-600 w-7 h-7" />
               </div>
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">
+              <div className="flex-grow">
+                <h3 className="font-bold text-lg text-gray-800 group-hover:text-blue-700 transition-colors">
                   Dashboard
-                </h2>
-                <p className="text-sm text-gray-600">
-                  Go back to your dashboard
+                </h3>
+                <p className="text-sm text-gray-500 group-hover:text-blue-600 transition-colors">
+                  Manage your documents and settings
                 </p>
               </div>
             </div>
           </Link>
 
-          <Link
-            href="/"
-            className="group p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-between"
-          >
-            <div className="flex items-center space-x-4">
-              <div className="p-3 bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition-colors">
-                <Home className="w-6 h-6 text-indigo-600" />
+          <Link href="/" className="w-full">
+            <div className="bg-white rounded-xl border-2 border-green-200 p-6 flex items-center space-x-4 transform transition-all duration-100 hover:shadow-md hover:border-green-400 group">
+              <div className="bg-green-100 p-3 rounded-full group-hover:bg-green-200 transition-colors">
+                <Home className="text-green-600 w-7 h-7" />
               </div>
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900">Home</h2>
-                <p className="text-sm text-gray-600">Return to homepage</p>
+              <div className="flex-grow">
+                <h3 className="font-bold text-lg text-gray-800 group-hover:text-green-700 transition-colors">
+                  Home
+                </h3>
+                <p className="text-sm text-gray-500 group-hover:text-green-600 transition-colors">
+                  Return to main landing page
+                </p>
               </div>
             </div>
           </Link>
         </div>
-
-        {/* <Space>
-          <Link href="/dashboard/user">
-            <Button>Dashboard</Button>
-          </Link>
-          <Link href="/">
-            <Button>Home</Button>
-          </Link>
-        </Space> */}
       </Space>
     </div>
   );
