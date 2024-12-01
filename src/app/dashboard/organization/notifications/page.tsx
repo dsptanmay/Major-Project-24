@@ -9,6 +9,8 @@ import {
   LayoutDashboard,
   SquareArrowOutUpRight,
 } from "lucide-react";
+import toast, { Toaster } from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 interface Notification {
   org_address: string;
@@ -45,6 +47,7 @@ const StatusLabel: React.FC<{ status: Notification["status"] }> = ({
 const NotificationsPage: React.FC = () => {
   const activeAccount = useActiveAccount();
   const [notifications, setNotifications] = useState<Notification[]>();
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchData() {
@@ -57,6 +60,27 @@ const NotificationsPage: React.FC = () => {
     }
     if (activeAccount) fetchData();
   }, [activeAccount]);
+
+  const deleteNotification = async (notification: Notification) => {
+    try {
+      const response = await fetch(
+        `/api/notifications?from_id=${notification.org_address}&to_id=${notification.user_address}&token_id=${notification.nft_token_id}`,
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      if (response.ok) {
+        toast.success("Notification deleted succesfully!");
+        setNotifications((prevNotifications) =>
+          prevNotifications?.filter((n) => n !== notification)
+        );
+      }
+    } catch (error) {
+      toast.error("Failed to delete notification!");
+      console.log(error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100">
@@ -113,8 +137,8 @@ const NotificationsPage: React.FC = () => {
                   <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    View
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Action
                   </th>
                 </tr>
               </thead>
@@ -143,8 +167,19 @@ const NotificationsPage: React.FC = () => {
                             className="w-full flex items-center text-sm text-center justify-center text-gray-700"
                             href={`/dashboard/organization/view/${notification.nft_token_id}`}
                           >
+                            View{" "}
                             <SquareArrowOutUpRight className="h-4 text-gray-600" />
                           </Link>
+                        )}
+                        {notification.status === "denied" && (
+                          <div className="w-full flex items-center align-middle justify-center">
+                            <button
+                              onClick={() => deleteNotification(notification)}
+                              className="flex items-center text-center bg-red-600 text-white px-3 py-2 rounded-full text-xs font-semibold font-mediu drop-shadow-sm hover:drop-shadow-md"
+                            >
+                              Delete Notification
+                            </button>
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -195,6 +230,8 @@ const NotificationsPage: React.FC = () => {
           </Link>
         </div>
       </main>
+
+      <Toaster />
     </div>
   );
 };
