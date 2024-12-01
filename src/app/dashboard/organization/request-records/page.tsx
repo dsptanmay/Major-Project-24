@@ -11,7 +11,6 @@ export default function RequestRecords() {
   const { user } = useUser();
   const activeAccount = useActiveAccount();
   const [formData, setFormData] = useState({
-    user_address: "",
     tokenId: "",
     comments: "",
   });
@@ -31,7 +30,6 @@ export default function RequestRecords() {
     const data = {
       org_address: activeAccount!.address,
       org_name: user!.username!,
-      user_address: formData.user_address,
       nft_token_id: formData.tokenId,
       comments: formData.comments,
     };
@@ -48,7 +46,6 @@ export default function RequestRecords() {
         toast.success("Notification sent successfully!");
       }
       setFormData({
-        user_address: "",
         tokenId: "",
         comments: "",
       });
@@ -59,9 +56,7 @@ export default function RequestRecords() {
 
   // Check if all fields are filled
   const isFormValid =
-    formData.user_address.trim() !== "" &&
-    formData.tokenId.trim() !== "" &&
-    formData.comments.trim() !== "";
+    formData.tokenId.trim() !== "" && formData.comments.trim() !== "";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 flex items-center justify-center p-4">
@@ -88,12 +83,12 @@ export default function RequestRecords() {
 
         <div className="bg-white shadow-2xl rounded-xl p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
+            {/* <div>
               <label
                 htmlFor="toId"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Patient's Wallet Address <span className="text-red-700">*</span>
+                Patient's Username <span className="text-red-700">*</span>
               </label>
               <input
                 type="text"
@@ -105,7 +100,7 @@ export default function RequestRecords() {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter patient's wallet Address"
               />
-            </div>
+            </div> */}
 
             <div>
               <label
