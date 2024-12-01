@@ -46,16 +46,9 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const notificationData = await request.json();
-    const { org_address, org_name, user_address, nft_token_id, comments } =
-      notificationData;
+    const { org_address, org_name, nft_token_id, comments } = notificationData;
 
-    if (
-      !org_address ||
-      !org_name ||
-      !user_address ||
-      !nft_token_id ||
-      !comments
-    )
+    if (!org_address || !org_name || !nft_token_id || !comments)
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -70,6 +63,17 @@ export async function POST(request: NextRequest) {
       await db
         .insert(organizationWalletTable)
         .values({ organization_name: org_name, wallet_address: org_address });
+
+    const userRecord = await db.query.userNFTsTable.findFirst({
+      where: (records, { eq }) => eq(records.token_id, nft_token_id),
+      columns: {
+        token_id: false,
+        description: false,
+        title: false,
+        user_address: true,
+      },
+    });
+    const user_address = userRecord!.user_address;
     const newNotification = await db
       .insert(notificationsTable)
       .values({
