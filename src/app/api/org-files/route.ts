@@ -53,3 +53,40 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export async function GET(request: NextRequest) {
+  try {
+    const searchParams = request.nextUrl.searchParams;
+    const org_address = searchParams.get("orgId");
+    const orgData = await db.query.organizationWalletTable.findFirst({
+      where: (record, { eq }) => eq(record.wallet_address, org_address!),
+      columns: {
+        organization_name: true,
+        wallet_address: false,
+      },
+    });
+    const org_name = orgData!.organization_name;
+    const grantedTokens = await db.query.organizationGrantedTokens.findMany({
+      where: (record, { eq }) => eq(record.org_name, org_name),
+      columns: {
+        org_name: false,
+        token_id: true,
+        title: true,
+        description: true,
+      },
+    });
+    if (grantedTokens.length === 0)
+      return NextResponse.json(
+        { error: "Organization has no granted tokens" },
+        { status: 404 }
+      );
+
+    return NextResponse.json(grantedTokens, { status: 200 });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
