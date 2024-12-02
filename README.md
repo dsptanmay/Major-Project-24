@@ -13,7 +13,8 @@ Available routes:
 
 Routes to be added:
 
-- /dashboard/user/upload
-- /dashboard/organization/request
-- /dashboard/organization/invoices
-- /dashboard/organization/status/\[id\]
+- ~~/dashboard/user/upload~~
+- ~~/dashboard/organization/request~~
+- ~~/dashboard/organization/invoices~~
+- ~~/dashboard/organization/status/\[id\]~~
+- /dashboard/user/access-control
