@@ -1,5 +1,9 @@
 import { db } from "@/database/db";
-import { organizationGrantedTokens, userNFTsTable } from "@/database/schema";
+import {
+  organizationGrantedTokens,
+  organizationWalletTable,
+  userNFTsTable,
+} from "@/database/schema";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -21,13 +25,21 @@ export async function GET(request: NextRequest) {
     const userTokens = await db
       .select({
         organization_name: organizationGrantedTokens.org_name,
-        token_id: organizationGrantedTokens.token_id,
+        organization_address: organizationWalletTable.wallet_address,
         title: organizationGrantedTokens.title,
+        token_id: organizationGrantedTokens.token_id,
       })
-      .from(userNFTsTable)
+      .from(organizationGrantedTokens)
       .innerJoin(
-        organizationGrantedTokens,
-        eq(userNFTsTable.token_id, organizationGrantedTokens.token_id)
+        organizationWalletTable,
+        eq(
+          organizationGrantedTokens.org_name,
+          organizationWalletTable.organization_name
+        )
+      )
+      .innerJoin(
+        userNFTsTable,
+        eq(organizationGrantedTokens.token_id, userNFTsTable.token_id)
       )
       .where(eq(userNFTsTable.user_address, user_address!));
 
