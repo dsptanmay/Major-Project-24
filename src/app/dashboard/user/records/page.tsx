@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, act } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, Button, Empty } from "antd";
 import { ConnectButton, useActiveAccount } from "thirdweb/react";
 import { client, wallets } from "@/app/client";
