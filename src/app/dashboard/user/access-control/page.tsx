@@ -1,10 +1,17 @@
 "use client";
-import { client, wallets } from "@/app/client";
+import { client, contract, wallets } from "@/app/client";
 import { Home, LaptopMinimalCheck, LayoutDashboard, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { ConnectButton, darkTheme, useActiveAccount } from "thirdweb/react";
+import {
+  ConnectButton,
+  darkTheme,
+  useActiveAccount,
+  useSendTransaction,
+} from "thirdweb/react";
 import "./page.css";
 import Link from "next/link";
+import toast, { Toaster } from "react-hot-toast";
+import { prepareContractCall } from "thirdweb";
 
 interface RecordData {
   organization_name: string;
@@ -15,6 +22,7 @@ interface RecordData {
 
 function AccessControlPage() {
   const [records, setRecords] = useState<RecordData[]>([]);
+  const { mutate: sendTransaction } = useSendTransaction();
   const activeAccount = useActiveAccount();
 
   useEffect(() => {
@@ -23,11 +31,41 @@ function AccessControlPage() {
         `/api/access?userAddress=${activeAccount!.address}`,
         { method: "GET", headers: { "Content-Type": "application/json" } }
       );
+      const data: RecordData[] = await response.json();
+      if (response.ok) {
+        toast.success("Fetched records successfully!");
+        setRecords(data);
+      } else {
+        toast.error("Error in fetching records!");
+      }
     };
     if (activeAccount) fetchData();
   }, [activeAccount]);
 
-  const handleRevoke = async (record: RecordData) => {};
+  const handleRevoke = async (record: RecordData) => {
+    try {
+      const transaction = prepareContractCall({
+        contract,
+        method: "function revokeAccess(uint256 tokenId, address user)",
+        params: [BigInt(record.nft_token_id), record.organization_address],
+      });
+      sendTransaction(transaction);
+      const response = await fetch(
+        `/api/access?orgName=${record.organization_name}&tokenId=${record.nft_token_id}`,
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      if (response.ok) {
+        toast.success("Successfully revoked access");
+        setRecords((prev) => prev.filter((n) => n != record));
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to revoke access!");
+    }
+  };
   return (
     <div className="h-screen max:h-screen-auto flex flex-col space-y-8 bg-gradient-to-br from-yellow-400/35 to-purple-400/60 p-10">
       <header className="p-5 flex justify-between items-center rounded-lg drop-shadow-sm hover:drop-shadow-md transition-all duration-200 bg-white">
@@ -88,25 +126,20 @@ function AccessControlPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {record.organization_name}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-left text-sm text-gray-900">
                         {record.nft_token_id}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900">
-                        {record.title.substring(0, 10)}...
+                        {record.title.length > 30
+                          ? `${record.title.substring(0, 30)}...`
+                          : record.title}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right space-x-2">
-                        {/* <button
-                          onClick={() => handleApprove(notification)}
-                          className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-full shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
-                        >
-                          <Check className="w-4 h-4 mr-1" />
-                          Grant
-                        </button> */}
+                      <td className="px-6 py-4 whitespace-nowrap text-center space-x-2">
                         <button
                           onClick={() => handleRevoke(record)}
-                          className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-full shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+                          className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-full shadow-sm text-red-800 bg-red-200 hover:bg-red-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
                         >
-                          <X className="w-4 h-4 mr-1" />
+                          {/* <X className="w-4 h-4 mr-1" /> */}
                           Revoke Access
                         </button>
                       </td>
@@ -114,6 +147,13 @@ function AccessControlPage() {
                   ))}
               </tbody>
             </table>
+            {records && records.length === 0 && (
+              <div className="text-center py-8">
+                <p className="text-red-500 text-sm font-semibold">
+                  No records found
+                </p>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -150,6 +190,7 @@ function AccessControlPage() {
           </div>
         </Link>
       </div>
+      <Toaster />
     </div>
   );
 }
