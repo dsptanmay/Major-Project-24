@@ -3,11 +3,7 @@
 import React, { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { Button, message, Input, Typography, Card, Space } from "antd";
-import {
-  CloudUploadOutlined,
-  FileTextOutlined,
-  CheckCircleOutlined,
-} from "@ant-design/icons";
+import { CloudUploadOutlined, CheckCircleOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import { upload } from "thirdweb/storage";
 import { client, contract, wallets } from "@/app/client";
@@ -18,9 +14,9 @@ import {
   useSendTransaction,
 } from "thirdweb/react";
 import { prepareContractCall } from "thirdweb";
-import { FileText, FileUp, Home, LayoutDashboard } from "lucide-react";
+import { FileUp, Home, LayoutDashboard } from "lucide-react";
 
-const { Title, Paragraph } = Typography;
+const { Paragraph } = Typography;
 
 export default function UploadPage() {
   const { mutate: sendTransaction } = useSendTransaction();
@@ -35,15 +31,13 @@ export default function UploadPage() {
     title: "",
   });
 
-  const { data: tokenID, isPending } = useReadContract({
+  const { data: tokenID } = useReadContract({
     contract,
     method: "function nextTokenIdToMint() view returns (uint256)",
     params: [],
   });
   const onDrop = useCallback(async (acceptedFiles: Array<File>) => {
     const file = acceptedFiles[0];
-    console.log(acceptedFiles);
-    console.log(file);
 
     try {
       setUploadState((prev) => ({ ...prev, uploading: true }));
