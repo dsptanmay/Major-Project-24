@@ -4,20 +4,22 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { FileIcon } from "lucide-react";
-
-// Dynamically import forge to ensure it's only loaded client-side
-import dynamic from "next/dynamic";
+import { FileIcon, UploadIcon } from "lucide-react";
+import { upload } from "thirdweb/storage";
+import { client } from "@/app/client";
+import "./page.css";
 
 const PdfEncryptionUploader = () => {
   const [file, setFile] = useState<File | null>(null);
   const [encryptionKey, setEncryptionKey] = useState<string | null>(null);
+  const [ipfsLink, setIpfsLink] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isEncrypting, setIsEncrypting] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // Web3 Storage client setup (replace with your actual token)
 
   // File selection handler
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    event.preventDefault();
     const selectedFile = event.target.files?.[0];
 
     // Validate file type
@@ -32,15 +34,16 @@ const PdfEncryptionUploader = () => {
     }
   };
 
-  // Encryption handler
-  const handleEncrypt = async () => {
+  // Encryption and IPFS upload handler
+  const handleEncryptAndUpload = async () => {
     if (!file) {
       setError("Please select a PDF file first");
       return;
     }
 
-    setIsEncrypting(true);
+    setIsProcessing(true);
     setError(null);
+    setIpfsLink(null);
 
     try {
       // Dynamically import forge
@@ -72,7 +75,7 @@ const PdfEncryptionUploader = () => {
       const encrypted = cipher.output;
       const tag = cipher.mode.tag;
 
-      // Prepare downloadable encrypted file
+      // Prepare encrypted data object
       const encryptedData = {
         iv: forge.util.bytesToHex(iv),
         encryptedContent: encrypted.toHex(),
@@ -80,70 +83,102 @@ const PdfEncryptionUploader = () => {
         originalName: file.name,
       };
 
-      // Convert to blob for download
-      const blob = new Blob([JSON.stringify(encryptedData)], {
+      // Convert to blob for IPFS upload
+      const encryptedBlob = new Blob([JSON.stringify(encryptedData)], {
         type: "application/json",
       });
-      const downloadLink = URL.createObjectURL(blob);
 
-      // Create download link
-      const link = document.createElement("a");
-      link.href = downloadLink;
-      link.download = `${file.name}.encrypted.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Create file for upload
+      const encryptedFile = new File(
+        [encryptedBlob],
+        `${file.name}.encrypted.json`,
+        {
+          type: "application/json",
+        }
+      );
+
+      // Upload to IPFS
+      const uri = await upload({ client, files: [encryptedFile] });
+
+      // Generate IPFS link
+      const ipfsUrl = `https://${
+        process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID
+      }.ipfscdn.io/ipfs/${uri.substring(7)}/`;
+      setIpfsLink(ipfsUrl);
 
       // Store and display encryption key
       const hexKey = forge.util.bytesToHex(key);
       setEncryptionKey(hexKey);
     } catch (err) {
       setError(
-        "Encryption failed: " +
+        "Encryption/Upload failed: " +
           (err instanceof Error ? err.message : "Unknown error")
       );
     } finally {
-      setIsEncrypting(false);
+      setIsProcessing(false);
     }
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white shadow-md rounded-lg">
-      <h2 className="text-xl font-bold mb-4 flex items-center">
-        <FileIcon className="mr-2" /> PDF Encryption
-      </h2>
+    <div
+      className="w-full min-h-screen flex flex-col py-10 justify-center"
+      id="bg"
+    >
+      <div className="max-w-md mx-auto p-6 bg-white shadow-md rounded-lg">
+        <h2 className="text-xl font-bold mb-4 flex items-center">
+          <FileIcon className="mr-2" /> PDF Encryption & IPFS Upload
+        </h2>
 
-      <Input
-        type="file"
-        accept=".pdf"
-        onChange={handleFileChange}
-        className="mb-4"
-      />
+        <Input
+          type="file"
+          accept=".pdf"
+          onChange={handleFileChange}
+          className="mb-4"
+        />
 
-      <Button
-        onClick={handleEncrypt}
-        disabled={!file || isEncrypting}
-        className="w-full"
-      >
-        {isEncrypting ? "Encrypting..." : "Encrypt PDF"}
-      </Button>
+        <Button
+          onClick={handleEncryptAndUpload}
+          disabled={!file || isProcessing}
+          className="w-full"
+        >
+          {isProcessing
+            ? "Encrypting & Uploading..."
+            : "Encrypt & Upload to IPFS"}
+        </Button>
 
-      {error && (
-        <Alert variant="destructive" className="mt-4">
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
+        {error && (
+          <Alert variant="destructive" className="mt-4">
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
-      {encryptionKey && (
-        <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded">
-          <p className="font-semibold">Encryption Key:</p>
-          <code className="break-all text-sm">{encryptionKey}</code>
-          <p className="text-xs text-yellow-600 mt-2">
-            ⚠️ Save this key securely. You'll need it to decrypt the file.
-          </p>
-        </div>
-      )}
+        {encryptionKey && (
+          <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded">
+            <p className="font-semibold">Encryption Key:</p>
+            <code className="break-all text-sm">{encryptionKey}</code>
+            <p className="text-xs text-yellow-600 mt-2">
+              ⚠️ Save this key securely. You'll need it to decrypt the file.
+            </p>
+          </div>
+        )}
+
+        {ipfsLink && (
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded">
+            <p className="font-semibold flex items-center">
+              <UploadIcon className="mr-2" /> IPFS Link:
+            </p>
+            <a
+              href={ipfsLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 break-all hover:underline"
+            >
+              {ipfsLink}
+            </a>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
