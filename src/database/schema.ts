@@ -54,7 +54,7 @@ export const userNFTsTable = pgTable("user_files", {
   description: varchar({ length: 255 }).notNull(),
 });
 
-export const userEncryptionsKeysTable = pgTable("user_encryptions", {
-  user_address: varchar({ length: 255 }).primaryKey(),
-  encryption_key: varchar({ length: 255 }).notNull(),
+export const tokenEncryptions = pgTable("token_encryptions", {
+  tokenId: varchar("token_id", { length: 255 }).primaryKey().notNull(),
+  encryptionKey: varchar("encryption_key", { length: 255 }).notNull(),
 });
