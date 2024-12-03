@@ -1,16 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { FileIcon } from "lucide-react";
+import { FileIcon, EyeIcon } from "lucide-react";
 
-const PdfDecryptionUploader = () => {
+const PdfDecryptionViewer = ({ params }: any) => {
+  const tokenId = params.token_id as string;
+  console.log(tokenId);
   const [encryptedFile, setEncryptedFile] = useState<File | null>(null);
   const [decryptionKey, setDecryptionKey] = useState<string>("");
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isDecrypting, setIsDecrypting] = useState(false);
+  const pdfViewerRef = useRef<HTMLIFrameElement>(null);
 
   // File selection handler
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,6 +29,7 @@ const PdfDecryptionUploader = () => {
       }
       setEncryptedFile(selectedFile);
       setError(null);
+      setPdfUrl(null);
     }
   };
 
@@ -97,16 +102,8 @@ const PdfDecryptionUploader = () => {
       // Create a data URL
       const pdfDataUri = `data:application/pdf;base64,${base64Pdf}`;
 
-      // Create download link
-      const link = document.createElement("a");
-      link.href = pdfDataUri;
-      link.download = encryptedData.originalName || "decrypted.pdf";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      // Optional: Open in new tab/window for preview
-      window.open(pdfDataUri, "_blank");
+      // Set PDF URL for viewer
+      setPdfUrl(pdfDataUri);
     } catch (err) {
       setError(
         "Decryption failed: " +
@@ -118,42 +115,56 @@ const PdfDecryptionUploader = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white shadow-md rounded-lg">
+    <div className="max-w-2xl mx-auto p-6 bg-white shadow-md rounded-lg">
       <h2 className="text-xl font-bold mb-4 flex items-center">
-        <FileIcon className="mr-2" /> PDF Decryption
+        <FileIcon className="mr-2" /> PDF Decryption Viewer
       </h2>
 
-      <Input
-        type="file"
-        accept=".json"
-        onChange={handleFileChange}
-        className="mb-4"
-      />
+      <div className="space-y-4">
+        <Input type="file" accept=".json" onChange={handleFileChange} />
 
-      <Input
-        type="text"
-        placeholder="Enter Decryption Key"
-        value={decryptionKey}
-        onChange={(e) => setDecryptionKey(e.target.value)}
-        className="mb-4"
-      />
+        <Input
+          type="text"
+          placeholder="Enter Decryption Key"
+          value={decryptionKey}
+          onChange={(e) => setDecryptionKey(e.target.value)}
+        />
 
-      <Button
-        onClick={handleDecrypt}
-        disabled={!encryptedFile || !decryptionKey || isDecrypting}
-        className="w-full"
-      >
-        {isDecrypting ? "Decrypting..." : "Decrypt PDF"}
-      </Button>
+        <Button
+          onClick={handleDecrypt}
+          disabled={!encryptedFile || !decryptionKey || isDecrypting}
+          className="w-full"
+        >
+          {isDecrypting ? "Decrypting..." : "Decrypt and View PDF"}
+        </Button>
 
-      {error && (
-        <Alert variant="destructive" className="mt-4">
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
+        {error && (
+          <Alert variant="destructive">
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {pdfUrl && (
+          <div className="mt-4 border rounded-lg overflow-hidden">
+            <div className="bg-gray-100 p-2 flex items-center justify-between">
+              <h3 className="flex items-center">
+                <EyeIcon className="mr-2" /> PDF Preview
+              </h3>
+            </div>
+            <iframe
+              ref={pdfViewerRef}
+              src={pdfUrl}
+              width="100%"
+              height="600px"
+              title="Decrypted PDF"
+              className="border-none"
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
-export default PdfDecryptionUploader;
+export default PdfDecryptionViewer;
