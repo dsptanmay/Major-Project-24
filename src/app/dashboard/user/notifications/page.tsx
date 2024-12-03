@@ -54,7 +54,6 @@ const NotificationsPage = () => {
         },
         body: JSON.stringify({
           org_address: notification.org_address,
-          x: notification.org_name,
           user_address: notification.user_address,
           nft_token_id: notification.nft_token_id,
           status: "approved",
