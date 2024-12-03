@@ -4,9 +4,10 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { FileIcon, UploadIcon } from "lucide-react";
+import { FileIcon, Home, LayoutDashboard, UploadIcon } from "lucide-react";
 import { upload } from "thirdweb/storage";
 import { client, contract, wallets } from "@/app/client";
+import Link from "next/link";
 import "./page.css";
 import {
   ConnectButton,
@@ -16,10 +17,14 @@ import {
   useSendTransaction,
 } from "thirdweb/react";
 import { prepareContractCall } from "thirdweb";
+import { useRouter } from "next/navigation";
+import { Label } from "@/components/ui/label";
 
 const PdfEncryptionUploader = () => {
   const { mutate: sendTransaction } = useSendTransaction();
   const activeAccount = useActiveAccount();
+  const router = useRouter();
+
   const [file, setFile] = useState<File | null>(null);
   const [encryptionKey, setEncryptionKey] = useState<string | null>(null);
   const [ipfsLink, setIpfsLink] = useState<string | null>(null);
@@ -27,6 +32,8 @@ const PdfEncryptionUploader = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isMinting, setIsMinting] = useState(false);
+  const [isMinted, setIsMinted] = useState(false);
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
@@ -88,6 +95,7 @@ const PdfEncryptionUploader = () => {
       if (userResponse.ok && tokenResponse.ok) {
         setIsMinting(false);
         setSuccess("Minted NFT Successfully!");
+        setIsMinted(true);
       }
     } catch (err) {
       console.error(err);
@@ -183,11 +191,14 @@ const PdfEncryptionUploader = () => {
   };
 
   return (
-    <div className="w-full min-h-screen flex flex-col py-10 space-y-10" id="bg">
+    <div
+      className="w-full min-h-screen flex flex-col py-5 space-y-5 items-center justify-between"
+      id="bg"
+    >
       <header className="bg-white rounded-lg p-5 drop-shadow-sm max-w-5xl mx-auto flex justify-between w-full">
         <div className="flex items-center space-x-3">
-          <UploadIcon className="w-6 h-6 text-orange-600" />
-          <h1 className="font-semibold text-xl">Upload Documents</h1>
+          <UploadIcon className="w-6 h-6 text-orange-800" />
+          <h1 className="font-bold text-xl">Upload Documents</h1>
         </div>
         <ConnectButton
           client={client}
@@ -208,21 +219,26 @@ const PdfEncryptionUploader = () => {
       </header>
       {activeAccount && (
         <div className="max-w-5xl mx-auto p-6 bg-white shadow-md rounded-lg flex flex-col space-y-5 w-full">
-          <h2 className="text-xl font-bold mb-4 flex items-center">
-            <FileIcon className="mr-2" /> PDF Encryption & IPFS Upload
+          <h2 className="text-sm font-bold flex items-center text-gray-600">
+            Your PDF Files will be encrypted using AES-256 and then will be
+            converted to NFTs.
           </h2>
 
-          <Input type="file" accept=".pdf" onChange={handleFileChange} />
+          {!ipfsLink && (
+            <Input type="file" accept=".pdf" onChange={handleFileChange} />
+          )}
 
-          <Button
-            onClick={handleEncryptAndUpload}
-            disabled={!file || isProcessing}
-            className="w-full"
-          >
-            {isProcessing
-              ? "Encrypting & Uploading..."
-              : "Encrypt & Upload to IPFS"}
-          </Button>
+          {!ipfsLink && (
+            <Button
+              onClick={handleEncryptAndUpload}
+              disabled={!file || isProcessing}
+              className="w-full"
+            >
+              {isProcessing
+                ? "Encrypting & Uploading..."
+                : "Encrypt & Upload to IPFS"}
+            </Button>
+          )}
 
           {error && (
             <Alert variant="destructive" className="">
@@ -232,8 +248,8 @@ const PdfEncryptionUploader = () => {
           )}
 
           {encryptionKey && (
-            <div className=" p-3 bg-green-50 border border-green-200 rounded">
-              <p className="font-semibold">Encryption Key:</p>
+            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded">
+              <p className="font-semibold">Encryption Key</p>
               <code className="break-all text-sm">{encryptionKey}</code>
               {/* <p className="text-xs text-yellow-600 mt-2">
               ⚠️ Save this key securely. You'll need it to decrypt the file.
@@ -242,46 +258,89 @@ const PdfEncryptionUploader = () => {
           )}
 
           {ipfsLink && (
-            <div className="p-3 bg-blue-50 border border-blue-200 rounded">
-              <p className="font-semibold flex items-center">
-                <UploadIcon className="mr-2" /> IPFS Link:
-              </p>
-              <a
-                href={ipfsLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 break-all hover:underline"
-              >
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded flex flex-col space-y-2">
+              <p className="font-semibold flex items-center">IPFS Link</p>
+              <code className="text-blue-600 break-all text-sm">
                 {ipfsLink}
-              </a>
+              </code>
             </div>
           )}
           {ipfsLink && (
             <form
-              className="flex flex-col space-y-3"
+              className="flex flex-col space-y-5"
               onSubmit={(e) => mintNFT(e)}
             >
-              <Input
-                type="text"
-                placeholder="Enter title of document"
-                onChange={(e) => setTitle(e.target.value)}
-              />
-              <Input
-                type="text"
-                placeholder="Enter a description"
-                onChange={(e) => setDescription(e.target.value)}
-              />
-              <Button type="submit">Mint NFT</Button>
+              <div className="flex flex-col space-y-1">
+                <Label className="font-semibold text-sm text-gray-700">
+                  Title
+                </Label>
+                <Input
+                  type="text"
+                  placeholder="Enter title of document"
+                  onChange={(e) => setTitle(e.target.value)}
+                />
+              </div>
+              <div className="flex flex-col space-y-1">
+                <Label className="font-semibold text-sm text-gray-700">
+                  Description
+                </Label>
+                <Input
+                  type="text"
+                  placeholder="Enter a description"
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </div>
+              {!isMinted && (
+                <Button type="submit">
+                  {isMinting ? "Minting NFT..." : "Mint NFT"}
+                </Button>
+              )}
             </form>
           )}
           {success && (
-            <Alert variant="default" className="">
-              <AlertTitle>Success</AlertTitle>
-              <AlertDescription>{success}</AlertDescription>
-            </Alert>
+            <div className="p-3 bg-green-50 border border-green-200 rounded">
+              <p className="font-semibold">Success</p>
+              <code className="break-all text-sm">{success}</code>
+              {/* <p className="text-xs text-yellow-600 mt-2">
+            ⚠️ Save this key securely. You'll need it to decrypt the file.
+          </p> */}
+            </div>
           )}
         </div>
       )}
+      <div className="grid grid-cols-2 gap-4 w-full max-w-5xl">
+        <Link href="/dashboard/user" className="w-full">
+          <div className="bg-white rounded-xl border-2 border-blue-200 p-6 flex items-center space-x-4 transform transition-all duration-100 hover:shadow-md hover:border-blue-400 group">
+            <div className="bg-blue-100 p-3 rounded-full group-hover:bg-blue-200 transition-colors">
+              <LayoutDashboard className="text-blue-600 w-7 h-7" />
+            </div>
+            <div className="flex-grow">
+              <h3 className="font-bold text-lg text-gray-800 group-hover:text-blue-700 transition-colors">
+                Dashboard
+              </h3>
+              <p className="text-sm text-gray-500 group-hover:text-blue-600 transition-colors">
+                Manage your documents
+              </p>
+            </div>
+          </div>
+        </Link>
+
+        <Link href="/" className="w-full">
+          <div className="bg-white rounded-xl border-2 border-green-200 p-6 flex items-center space-x-4 transform transition-all duration-100 hover:shadow-md hover:border-green-400 group">
+            <div className="bg-green-100 p-3 rounded-full group-hover:bg-green-200 transition-colors">
+              <Home className="text-green-600 w-7 h-7" />
+            </div>
+            <div className="flex-grow">
+              <h3 className="font-bold text-lg text-gray-800 group-hover:text-green-700 transition-colors">
+                Home
+              </h3>
+              <p className="text-sm text-gray-500 group-hover:text-green-600 transition-colors">
+                Return to main landing page
+              </p>
+            </div>
+          </div>
+        </Link>
+      </div>
     </div>
   );
 };
