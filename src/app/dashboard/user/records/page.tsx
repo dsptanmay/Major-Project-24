@@ -62,7 +62,7 @@ export default function UserFilesDashboard() {
           NFTs owned by {activeAccount?.address.substring(0, 10)}...
         </div>
         {!activeAccount && (
-          <div className="bg-red-300 text-red-700 rounded-lg drop-shadow-sm hover:drop-shadow-md transition-all duration-200 text-center border-2 w-full border-red-600">
+          <div className="bg-red-300 text-red-700 rounded-lg drop-shadow-sm hover:drop-shadow-md transition-all duration-200 text-center border-2 w-full border-red-600 p-5 font-semibold">
             Connect your Wallet first!
           </div>
         )}
