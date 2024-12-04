@@ -71,6 +71,110 @@ const PdfDecryptionViewer = ({ params }: any) => {
     url: string,
     decryptionKey: string
   ): Promise<{ pdfUrl: string; originalName: string }> => {
+    // try {
+    //   // Dynamically import forge
+    //   const forge = await import("node-forge");
+
+    //   // Fetch the encrypted JSON file
+    //   const response = await fetch(url);
+    //   if (!response.ok) {
+    //     throw new Error(`HTTP error! status: ${response.status}`);
+    //   }
+    //   const encryptedData = await response.json();
+
+    //   // Detailed logging of encrypted data
+    //   console.log("Encrypted Data:", JSON.stringify(encryptedData, null, 2));
+    //   console.log("Decryption Key:", decryptionKey);
+
+    //   // Validate encrypted data structure
+    //   if (
+    //     !encryptedData.iv ||
+    //     !encryptedData.encryptedContent ||
+    //     !encryptedData.tag ||
+    //     !encryptedData.originalName
+    //   ) {
+    //     throw new Error("Invalid encrypted file format");
+    //   }
+
+    //   // Validate key and data lengths
+    //   if (decryptionKey.length === 0) {
+    //     throw new Error("Decryption key is empty");
+    //   }
+
+    //   try {
+    //     // Convert hex strings to binary
+    //     const keyBytes = forge.util.hexToBytes(decryptionKey);
+    //     const ivBytes = forge.util.hexToBytes(encryptedData.iv);
+    //     const tagBytes = forge.util.hexToBytes(encryptedData.tag);
+    //     const encryptedBytes = forge.util.hexToBytes(
+    //       encryptedData.encryptedContent
+    //     );
+
+    //     // Log byte conversions
+    //     console.log("Key Bytes Length:", keyBytes.length);
+    //     console.log("IV Bytes Length:", ivBytes.length);
+    //     console.log("Tag Bytes Length:", tagBytes.length);
+    //     console.log("Encrypted Bytes Length:", encryptedBytes.length);
+
+    //     // Create decipher
+    //     const decipher = forge.cipher.createDecipher("AES-GCM", keyBytes);
+
+    //     // Start the decipher
+    //     decipher.start({
+    //       iv: ivBytes,
+    //       tag: forge.util.createBuffer(tagBytes),
+    //       tagLength: 128,
+    //     });
+
+    //     // Update the decipher with encrypted content
+    //     decipher.update(forge.util.createBuffer(encryptedBytes));
+
+    //     // Finish decryption
+    //     const pass = decipher.finish();
+
+    //     if (!pass) {
+    //       throw new Error("Decryption failed - authentication tag mismatch");
+    //     }
+
+    //     // Get decrypted bytes directly
+    //     const decryptedBytes = decipher.output.getBytes();
+
+    //     // Log decrypted bytes
+    //     console.log("Decrypted Bytes Length:", decryptedBytes.length);
+
+    //     // Validate decrypted bytes
+    //     if (decryptedBytes.length === 0) {
+    //       throw new Error("Decrypted content is empty");
+    //     }
+
+    //     // Convert decrypted bytes to base64
+    //     const base64Pdf = btoa(decryptedBytes);
+
+    //     // Create a data URL
+    //     const pdfDataUri = `data:application/pdf;base64,${base64Pdf}`;
+
+    //     return {
+    //       pdfUrl: pdfDataUri,
+    //       originalName: encryptedData.originalName,
+    //     };
+    //   } catch (conversionErr) {
+    //     console.error("Conversion Error:", conversionErr);
+    //     throw new Error(
+    //       `Conversion failed: ${
+    //         conversionErr instanceof Error
+    //           ? conversionErr.message
+    //           : "Unknown conversion error"
+    //       }`
+    //     );
+    //   }
+    // } catch (err) {
+    //   console.error("Decryption Error:", err);
+    //   throw new Error(
+    //     "Decryption failed: " +
+    //       (err instanceof Error ? err.message : "Unknown error")
+    //   );
+    // }
+
     try {
       // Dynamically import forge
       const forge = await import("node-forge");
@@ -90,7 +194,6 @@ const PdfDecryptionViewer = ({ params }: any) => {
       if (
         !encryptedData.iv ||
         !encryptedData.encryptedContent ||
-        !encryptedData.tag ||
         !encryptedData.originalName
       ) {
         throw new Error("Invalid encrypted file format");
@@ -105,7 +208,6 @@ const PdfDecryptionViewer = ({ params }: any) => {
         // Convert hex strings to binary
         const keyBytes = forge.util.hexToBytes(decryptionKey);
         const ivBytes = forge.util.hexToBytes(encryptedData.iv);
-        const tagBytes = forge.util.hexToBytes(encryptedData.tag);
         const encryptedBytes = forge.util.hexToBytes(
           encryptedData.encryptedContent
         );
@@ -113,17 +215,14 @@ const PdfDecryptionViewer = ({ params }: any) => {
         // Log byte conversions
         console.log("Key Bytes Length:", keyBytes.length);
         console.log("IV Bytes Length:", ivBytes.length);
-        console.log("Tag Bytes Length:", tagBytes.length);
         console.log("Encrypted Bytes Length:", encryptedBytes.length);
 
         // Create decipher
-        const decipher = forge.cipher.createDecipher("AES-GCM", keyBytes);
+        const decipher = forge.cipher.createDecipher("AES-CBC", keyBytes);
 
         // Start the decipher
         decipher.start({
           iv: ivBytes,
-          tag: forge.util.createBuffer(tagBytes),
-          tagLength: 128,
         });
 
         // Update the decipher with encrypted content
@@ -133,7 +232,7 @@ const PdfDecryptionViewer = ({ params }: any) => {
         const pass = decipher.finish();
 
         if (!pass) {
-          throw new Error("Decryption failed - authentication tag mismatch");
+          throw new Error("Decryption failed");
         }
 
         // Get decrypted bytes directly

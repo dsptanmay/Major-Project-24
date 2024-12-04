@@ -116,6 +116,71 @@ const PdfEncryptionUploader = () => {
     setError(null);
     setIpfsLink(null);
 
+    // try {
+    //   // Dynamically import forge
+    //   const forge = await import("node-forge");
+
+    //   // Read file as ArrayBuffer
+    //   const fileBuffer = await file.arrayBuffer();
+
+    //   // Convert to Uint8Array
+    //   const uint8Array = new Uint8Array(fileBuffer);
+
+    //   // Generate key and IV
+    //   const key = forge.random.getBytesSync(32);
+    //   const iv = forge.random.getBytesSync(12);
+
+    //   // Create cipher
+    //   const cipher = forge.cipher.createCipher("AES-GCM", key);
+
+    //   cipher.start({
+    //     iv: iv,
+    //     tagLength: 128,
+    //   });
+
+    //   // Update cipher with file contents
+    //   cipher.update(forge.util.createBuffer(uint8Array));
+    //   cipher.finish();
+
+    //   // Get encrypted data and tag
+    //   const encrypted = cipher.output;
+    //   const tag = cipher.mode.tag;
+
+    //   // Prepare encrypted data object
+    //   const encryptedData = {
+    //     iv: forge.util.bytesToHex(iv),
+    //     encryptedContent: encrypted.toHex(),
+    //     tag: tag.toHex(),
+    //     originalName: file.name,
+    //   };
+
+    //   // Convert to blob for IPFS upload
+    //   const encryptedBlob = new Blob([JSON.stringify(encryptedData)], {
+    //     type: "application/json",
+    //   });
+
+    //   // Create file for upload
+    //   const encryptedFile = new File(
+    //     [encryptedBlob],
+    //     `${file.name}.encrypted.json`,
+    //     {
+    //       type: "application/json",
+    //     }
+    //   );
+
+    //   // Upload to IPFS
+    //   const uri = await upload({ client, files: [encryptedFile] });
+
+    //   // Generate IPFS link
+    //   // const ipfsUrl = `https://${
+    //   //   process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID
+    //   // }.ipfscdn.io/ipfs/${uri.substring(7)}/`;
+    //   setIpfsLink(uri);
+
+    //   // Store and display encryption key
+    //   const hexKey = forge.util.bytesToHex(key);
+    //   setEncryptionKey(hexKey);
+    // }
     try {
       // Dynamically import forge
       const forge = await import("node-forge");
@@ -127,30 +192,27 @@ const PdfEncryptionUploader = () => {
       const uint8Array = new Uint8Array(fileBuffer);
 
       // Generate key and IV
-      const key = forge.random.getBytesSync(32);
-      const iv = forge.random.getBytesSync(12);
+      const key = forge.random.getBytesSync(32); // 256-bit key
+      const iv = forge.random.getBytesSync(16); // 128-bit IV for AES-CBC
 
       // Create cipher
-      const cipher = forge.cipher.createCipher("AES-GCM", key);
+      const cipher = forge.cipher.createCipher("AES-CBC", key);
 
       cipher.start({
         iv: iv,
-        tagLength: 128,
       });
 
       // Update cipher with file contents
       cipher.update(forge.util.createBuffer(uint8Array));
       cipher.finish();
 
-      // Get encrypted data and tag
+      // Get encrypted data
       const encrypted = cipher.output;
-      const tag = cipher.mode.tag;
 
       // Prepare encrypted data object
       const encryptedData = {
         iv: forge.util.bytesToHex(iv),
         encryptedContent: encrypted.toHex(),
-        tag: tag.toHex(),
         originalName: file.name,
       };
 
@@ -172,9 +234,6 @@ const PdfEncryptionUploader = () => {
       const uri = await upload({ client, files: [encryptedFile] });
 
       // Generate IPFS link
-      // const ipfsUrl = `https://${
-      //   process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID
-      // }.ipfscdn.io/ipfs/${uri.substring(7)}/`;
       setIpfsLink(uri);
 
       // Store and display encryption key
